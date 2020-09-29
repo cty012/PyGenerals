@@ -7,16 +7,16 @@ class Scene:
         self.args = args
         self.background = c.Component(lambda ui: ui.show_div((0, 0), self.args.size, color=(60, 179, 113)))
         self.buttons = {
-            'new': c.Button(
-                (self.args.size[0] // 2, 360), (600, 80), 'New Game',
+            'sing': c.Button(
+                (self.args.size[0] // 2, 360), (600, 80), 'Single Player',
                 font=f.tnr(25), align=(1, 1), background=(210, 210, 210)
             ),
-            'join': c.Button(
-                (self.args.size[0] // 2, 460), (600, 80), 'Join Game',
+            'mult': c.Button(
+                (self.args.size[0] // 2, 460), (600, 80), 'Multi-Player',
                 font=f.tnr(25), align=(1, 1), background=(210, 210, 210)
             ),
-            'quit': c.Button(
-                (self.args.size[0] // 2, 560), (600, 80), 'Exit',
+            'back': c.Button(
+                (self.args.size[0] // 2, 560), (600, 80), 'Back',
                 font=f.tnr(25), align=(1, 1), background=(210, 210, 210)
             ),
         }
@@ -29,19 +29,16 @@ class Scene:
         return [None]
 
     def execute(self, name):
-        if name == 'new':
-            return ['mode']
-        elif name == 'join':
-            return ['join']
-        elif name == 'quit':
-            return ['quit']
+        if name == 'sing':
+            return ['game', {'open': 'new', 'mode': 'sing'}]
+        elif name == 'mult':
+            return ['game', {'open': 'new', 'mode': 'mult'}]
+        elif name == 'back':
+            return ['menu']
         return [None]
 
     def show(self, ui):
         self.background.show(ui)
-        ui.show_texts(
-            (self.args.size[0] // 2, 150), [["PY-", (128, 0, 0)], ["GENERALS", (0, 0, 128)]],
-            font=f.cambria(120), align=(1, 1)
-        )
+        ui.show_text((self.args.size[0] // 2, 150), "Game Mode", font=f.cambria(60), align=(1, 1))
         for name in self.buttons:
             self.buttons[name].show(ui)
