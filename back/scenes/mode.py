@@ -1,5 +1,8 @@
+import socket
+
 import back.sprites.component as c
 import utils.fonts as f
+import utils.functions as utils
 
 
 class Scene:
@@ -30,9 +33,14 @@ class Scene:
 
     def execute(self, name):
         if name == 'sing':
-            return ['game', {'open': 'new', 'mode': 'sing'}]
+            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            server.bind(('127.0.0.1', 5050))
+            server.settimeout(1.0)
+            server.listen()
+            return ['game', {'id': 'server', 'socket': server, 'clients': []}]
         elif name == 'mult':
-            return ['game', {'open': 'new', 'mode': 'mult'}]
+            return ['game', {'id': 'server', 'socket': None, 'clients': []}]
         elif name == 'back':
             return ['menu']
         return [None]
