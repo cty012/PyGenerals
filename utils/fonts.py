@@ -1,5 +1,5 @@
-def get_font(font_name, font_size):
-    return 'src', f'{font_name}.ttf', font_size
+def get_font(font_name, font_size, font_type='ttf'):
+    return 'src', f'{font_name}.{font_type}', font_size
 
 
 # times new roman

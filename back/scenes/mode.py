@@ -40,7 +40,7 @@ class Scene:
             server.listen()
             return ['game', {'id': 0, 'num': 1, 'socket': server, 'clients': []}]
         elif name == 'mult':
-            return ['game', {'id': 0, 'num': 1, 'socket': None, 'clients': []}]
+            return ['room_server']
         elif name == 'back':
             return ['menu']
         return [None]
