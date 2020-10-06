@@ -109,11 +109,14 @@ class Stopwatch_dev:
         else:
             self.set_speed(self.run_speed)
 
-    def clear(self) -> None:
+    def set_time(self, interval: Union[int, float]) -> None:
         speed = self.speed
         self.set_speed(0)
-        self.interval = 0
+        self.interval = interval
         self.set_speed(speed)
+
+    def clear(self) -> None:
+        self.set_time(0)
 
     # MARK: Queries
     def is_running(self) -> bool:
