@@ -18,7 +18,7 @@ class Scene:
         # server and client
         print('CLIENT ENTER room...')
         self.id = None
-        self.total = None
+        self.num = None
         self.thread = Thread(target=self.wait_info, name='wait-info')
         self.thread.start()
 
@@ -32,9 +32,9 @@ class Scene:
         }
 
     def process_events(self, events):
-        if self.total == 0:
+        if self.num == 0:
             return self.execute('back')
-        if self.mode is not None and self.id is not None and self.total is not None:
+        if self.id is not None and self.num is not None:
             return self.execute('play')
         if events['mouse-left'] == 'down':
             for name in self.buttons:
@@ -43,24 +43,23 @@ class Scene:
         return [None]
 
     def wait_info(self):
-        while self.total is None:
+        while self.num is None:
             try:
                 length = int(json.loads(self.client.recv(10).decode('utf-8')))
-                self.mode, self.id, self.total = json.loads(self.client.recv(length).decode('utf-8'))
-                if self.total == 0:
+                self.id, self.num = json.loads(self.client.recv(length).decode('utf-8'))
+                if self.num == 0:
                     break
                 print(f'\tyour id: {self.id}')
-                print(f'\tplayer number: {self.total}')
+                print(f'\tplayer number: {self.num}')
             except socket.timeout:
                 pass
 
     def execute(self, name):
         if name == 'play':
-            self.mode['connect'] = {'id': self.id, 'num': self.total, 'socket': self.client}
             print('CLIENT ENTER game...')
-            return ['game', self.mode]
+            return ['game', {'id': self.id, 'num': self.num, 'socket': self.client}]
         elif name == 'back':
-            self.total = 0
+            self.num = 0
             time.sleep(0.5)
             self.client.close()
             print('CLIENT EXIT room...')
