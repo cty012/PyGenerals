@@ -34,7 +34,7 @@ class Scene:
     def process_events(self, events):
         if self.num == 0:
             return self.execute('back')
-        if self.mode is not None and self.id is not None and self.num is not None:
+        if self.id is not None and self.num is not None:
             return self.execute('play')
         if events['mouse-left'] == 'down':
             for name in self.buttons:
