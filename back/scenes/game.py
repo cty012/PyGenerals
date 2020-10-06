@@ -31,12 +31,8 @@ class Scene:
 
     def execute(self, command):
         if command[0] == 'pause':
-            if self.game_menu.activated:
-                self.game_menu.activated = False
-
-            else:
-                self.game_menu.activated = True
-                self.game.map.clock.stop()
+            self.game_menu.activated = not self.game_menu.activated
+            self.game.execute(['pause'])
         elif command[0] == 'quit':
             return ['menu']
         return [None]
