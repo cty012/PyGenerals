@@ -44,7 +44,7 @@ class Block:
                 other.owner = self.owner
                 other.num = -other.num
                 if other.terrain == 'base':
-                    return ['conquer', self.owner, enemy]
+                    return [['conquer', self.owner, enemy]]
             return []
 
     def show(self, ui, players, *, pan=(0, 0)):

@@ -76,7 +76,6 @@ class Game:
                 # deal with msg
                 for msg_str in msg_strs:
                     msg = json.loads(msg_str)
-                    print(msg)
                     if msg['tag'] == 'move':
                         self.map.commands[id].append((tuple(msg['move'][0]), tuple(msg['move'][1])))
             print(f'SERVER END receiving FROM CLIENT-{id}...')
