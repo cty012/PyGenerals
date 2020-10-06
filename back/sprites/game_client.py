@@ -40,9 +40,8 @@ class Game:
         msg_b = bytes(msg, encoding='utf-8')
         msg_b_len_b = bytes(f'{len(msg_b):10}', encoding='utf-8')
         try:
-            for client in self.mode['clients']:
-                client.send(msg_b_len_b)
-                client.send(msg_b)
+            self.mode['socket'].send(msg_b_len_b)
+            self.mode['socket'].send(msg_b)
         except OSError as e:
             print(e)
 
