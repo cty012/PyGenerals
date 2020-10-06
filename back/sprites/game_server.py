@@ -17,10 +17,11 @@ class Game:
         # connect
         self.status = {'connected': True}
         self.thread_recv = []
-        for i in range(self.mode['num'] - 1):
+        for i in range(1, self.mode['num']):
             new_thread = Thread(target=self.receive(i), name=f'recv-{i+1}', daemon=True)
             new_thread.start()
             self.thread_recv.append(new_thread)
+        self.send(json.dumps({'tag': 'init', 'status': self.map.get_status(('owner', 'num', 'terrain'))}))
 
     def process_events(self, events):
         if events['mouse-left'] == 'down':
@@ -28,6 +29,7 @@ class Game:
         # update map
         if self.map.clock.get_time() >= 0.5:
             self.map.update()
+            self.send(json.dumps({'tag': 'status', 'status': self.map.get_status()}))
         # process map moves
         map_commands = self.map.parse_events(events['key-pressed'], events['key-down'])
         self.execute(['move-board', map_commands['move-board']])
@@ -60,12 +62,12 @@ class Game:
     def receive(self, id):
         def func():
             parser = Parser()
-            client = self.mode['clients'][id]
-            print(f'SERVER START receiving FROM C{id}...')
+            client = self.mode['clients'][id-1]
+            print(f'SERVER START receiving FROM CLIENT-{id}...')
             while self.status['connected']:
                 # receive and parse msg
                 try:
-                    msg_strs = parser.parse(client['socket'].recv(1 << 20))
+                    msg_strs = parser.parse(client.recv(1 << 20))
                 except socket.timeout:
                     continue
                 except json.decoder.JSONDecodeError:
@@ -74,9 +76,10 @@ class Game:
                 # deal with msg
                 for msg_str in msg_strs:
                     msg = json.loads(msg_str)
+                    print(msg)
                     if msg['tag'] == 'move':
                         self.map.commands[id].append((tuple(msg['move'][0]), tuple(msg['move'][1])))
-            print(f'SERVER END receiving FROM C{id}...')
+            print(f'SERVER END receiving FROM CLIENT-{id}...')
         return func
 
     def show(self, ui):

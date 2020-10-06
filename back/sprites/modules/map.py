@@ -8,9 +8,11 @@ import utils.stopwatch as sw
 
 
 class Map:
-    def __init__(self, args, pos, players, id, dim=(29, 24), *, align=(0, 0)):
+    def __init__(self, args, pos, players, id, dim=(29, 24), *, map_status=None, align=(0, 0)):
         self.args = args
         self.dim = dim
+        self.prd = tuple(product(range(self.dim[0]), range(self.dim[1])))
+        self.eprd = tuple(enumerate(self.prd))
 
         # display
         self.grid_size = 40
@@ -24,7 +26,7 @@ class Map:
         self.cities = None
         self.players = players
         self.id = id
-        MapLoader.init_blocks(self)
+        MapLoader.init_blocks(self, map_status=map_status)
 
         # update
         self.turn = 1
@@ -65,7 +67,7 @@ class Map:
 
     def get_blocks_by_prop(self, prop, values):
         blocks = []
-        for row, col in product(range(self.dim[0]), range(self.dim[1])):
+        for row, col in self.prd:
             if self.get((row, col)).get_prop(prop) in values:
                 blocks.append((row, col))
         return blocks
@@ -99,7 +101,7 @@ class Map:
                 if self.get(cord).owner is not None:
                     self.get(cord).num += 1
         if self.turn % self.blank_gen == 0:
-            for cord in product(range(self.dim[0]), range(self.dim[1])):
+            for cord in self.prd:
                 if self.get(cord).owner is not None and self.get(cord).terrain == 'blank':
                     self.get(cord).num += 1
 
@@ -110,23 +112,32 @@ class Map:
                 com = self.commands[id].pop(0)
                 block, target = self.get(com[0]), self.get(com[1])
                 # skip invalid command
-                if block.owner != id:
+                if block.owner != id or block.num <= 1:
                     continue
                 # execute command
                 player_updates = block.move(target)
                 # calc effect of command
                 for p_update in player_updates:
-                    if p_update[0] is not None:
-                        self.players[p_update[0]]['num'] += p_update[1]
+                    if p_update[0] == 'num-change':
+                        self.players[p_update[1]]['num'] += p_update[2]
+                    elif p_update[0] == 'conquer':
+                        for cord in self.prd:
+                            block = self.get(cord)
+                            if block.owner == p_update[2]:
+                                block.owner = p_update[1]
+                                if block.terrain == 'base':
+                                    block.terrain = 'city'
                 break
 
-        # refresh visible
-        self.refresh_visible()
+        # refresh
+        self.refresh()
 
-    def refresh_visible(self):
-        for row, col in product(range(self.dim[0]), range(self.dim[1])):
+    def refresh(self):
+        # refresh visible and player num
+
+        for row, col in self.prd:
             self.get((row, col)).visible = False
-        for row, col in product(range(self.dim[0]), range(self.dim[1])):
+        for row, col in self.prd:
             if self.get((row, col)).owner == self.id:
                 self.get((row, col)).visible = True
                 for adj_cord in self.get_adj_cords((row, col)):
@@ -170,9 +181,21 @@ class Map:
             end = (self.pos[0] + self.dim[0] * self.grid_size, self.pos[1] + row * self.grid_size)
             ui.show_line(start, end, pan=(self.pan[0] + pan[0], self.pan[1] + pan[1]))
 
+    def get_status(self, fields=('owner', 'num')):
+        return {
+            field: [self.get(cord).get_prop(field) for cord in self.prd]
+            for field in fields
+        }
+
+    def set_status(self, status):
+        for field in status.keys():
+            for i, cord in self.eprd:
+                self.get(cord).set_prop(field, status[field][i])
+        self.refresh()
+
     def show(self, ui, *, pan=(0, 0)):
         # show blocks
-        for row, col in product(range(self.dim[0]), range(self.dim[1])):
+        for row, col in self.prd:
             self.blocks[row][col].show(ui, self.players, pan=(self.pan[0] + pan[0], self.pan[1] + pan[1]))
         # show grid
         self.show_grid(ui, pan=pan)
@@ -186,27 +209,36 @@ class Map:
 
 class MapLoader:
     @classmethod
-    def init_blocks(cls, map):
-        # init blocks
-        map.blocks = [[
-            b.Block((map.pos[0] + row * map.grid_size, map.pos[1] + col * map.grid_size), map.grid_size)
-            for col in range(map.dim[1])] for row in range(map.dim[0])]
+    def init_blocks(cls, map, *, map_status):
+        if map_status is None:
+            # init blocks
+            map.blocks = [[
+                b.Block((map.pos[0] + row * map.grid_size, map.pos[1] + col * map.grid_size), map.grid_size)
+                for col in range(map.dim[1])] for row in range(map.dim[0])]
 
-        # init cities and bases
-        special_cords = choices(list(product(range(map.dim[0]), range(map.dim[1]))), k=60+len(map.players))
-        mountain_cords, city_cords, base_cords = special_cords[:40], special_cords[40:60], special_cords[60:]
-        for cord in mountain_cords:
-            map.get(cord).terrain = 'mountain'
-        for cord in city_cords:
-            map.get(cord).terrain = 'city'
-            map.get(cord).num = randint(40, 50)
-        for id, cord in enumerate(base_cords):
-            map.get(cord).terrain = 'base'
-            map.get(cord).owner = id
-            map.get(cord).num = 1
+            # init cities and bases
+            special_cords = choices(map.prd, k=60+len(map.players))
+            mountain_cords, city_cords, base_cords = special_cords[:40], special_cords[40:60], special_cords[60:]
+            for cord in mountain_cords:
+                map.get(cord).terrain = 'mountain'
+            for cord in city_cords:
+                map.get(cord).terrain = 'city'
+                map.get(cord).num = randint(40, 50)
+            for id, cord in enumerate(base_cords):
+                map.get(cord).terrain = 'base'
+                map.get(cord).owner = id
+                map.get(cord).num = 1
+
+        else:
+            # init blocks
+            map.blocks = [[None for col in range(map.dim[1])] for row in range(map.dim[0])]
+            for i, (row, col) in map.eprd:
+                map.blocks[row][col] = b.Block(
+                    (map.pos[0] + row * map.grid_size, map.pos[1] + col * map.grid_size), map.grid_size,
+                    owner=map_status['owner'][i], num=map_status['num'][i], terrain=map_status['terrain'][i])
 
         # init map variables (cities, players, visible)
         map.cities = map.get_blocks_by_prop('terrain', ['base', 'city'])
         for id in range(len(map.players)):
             map.players[id]['num'] = len(map.get_blocks_by_prop('owner', [id]))
-        map.refresh_visible()
+        map.refresh()

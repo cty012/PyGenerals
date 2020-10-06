@@ -1,6 +1,10 @@
 import json
+import socket
+from threading import Thread
+import time
 
 import back.sprites.modules.map as m
+from utils.parser import Parser
 
 
 class Game:
@@ -10,7 +14,15 @@ class Game:
         # display
         player_colors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple'][:self.mode['num']]
         self.players = [{'num': 0, 'color': player_colors[id]} for id in range(self.mode['num'])]
-        self.map = m.Map(self.args, self.args.get_pos(1, 1), self.players, self.mode['id'], align=(1, 1))
+        self.map_status = None
+        # connect
+        self.status = {'connected': True}
+        self.thread_recv = Thread(target=self.receive, name='recv', daemon=True)
+        self.thread_recv.start()
+        # map
+        while self.map_status is None:
+            time.sleep(0.01)
+        self.map = m.Map(self.args, self.args.get_pos(1, 1), self.players, self.mode['id'], map_status=self.map_status, align=(1, 1))
 
     def process_events(self, events):
         if events['mouse-left'] == 'down':
@@ -44,6 +56,27 @@ class Game:
             self.mode['socket'].send(msg_b)
         except OSError as e:
             print(e)
+
+    def receive(self):
+        parser = Parser()
+        print(f'CLIENT START receiving FROM SERVER...')
+        while self.status['connected']:
+            # receive and parse msg
+            try:
+                msg_strs = parser.parse(self.mode['socket'].recv(1 << 20))
+            except socket.timeout:
+                continue
+            except json.decoder.JSONDecodeError:
+                print('\tJSON Decode Error!')
+                continue
+            # deal with msg
+            for msg_str in msg_strs:
+                msg = json.loads(msg_str)
+                if msg['tag'] == 'status':
+                    self.map.set_status(msg['status'])
+                elif msg['tag'] == 'init':
+                    self.map_status = msg['status']
+        print(f'CLIENT END receiving FROM SERVER...')
 
     def show(self, ui):
         self.map.show(ui)

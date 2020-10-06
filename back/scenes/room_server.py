@@ -66,11 +66,13 @@ class Scene:
             self.status['running'] = False
             # send info to clients
             for i, client in enumerate(self.clients):
-                print(i, client)
                 client_info = bytes(json.dumps([i + 1, len(self.clients) + 1]), encoding='utf-8')
                 client['socket'].send(bytes(f'{len(client_info):10}', encoding='utf-8'))
                 client['socket'].send(client_info)
-            return ['game', {'id': 0, 'num': len(self.clients), 'socket': self.server, 'clients': self.clients}]
+            return ['game', {
+                'id': 0, 'num': len(self.clients) + 1, 'socket': self.server,
+                'clients': [client['socket'] for client in self.clients]
+            }]
         elif name == 'back':
             self.close_client_sockets()
             self.status['running'] = False

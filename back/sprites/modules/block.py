@@ -20,6 +20,9 @@ class Block:
     def get_prop(self, prop):
         return eval(f'self.{prop}')
 
+    def set_prop(self, prop, value):
+        exec(f'self.{prop} = {value}')
+
     def fit(self):
         self.num = min(self.num, 9999)
         self.num = max(self.num, -9999)
@@ -40,7 +43,8 @@ class Block:
                 enemy = other.owner
                 other.owner = self.owner
                 other.num = -other.num
-                return [[self.owner, 1], [enemy, -1]]
+                if other.terrain == 'base':
+                    return ['conquer', self.owner, enemy]
             return []
 
     def show(self, ui, players, *, pan=(0, 0)):
