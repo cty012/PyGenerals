@@ -83,7 +83,7 @@ class Scene:
             if not utils.is_ip(self.server_ip):
                 return [None]
             try:
-                self.client.connect((self.server_ip, 5050))
+                self.client.connect((self.server_ip, 5051))
                 return ['room_client', self.server_ip, self.client]
             except socket.timeout:
                 self.set_error_msg('Connection failed: Timeout')
