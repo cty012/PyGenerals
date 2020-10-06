@@ -21,7 +21,7 @@ class Game:
             new_thread = Thread(target=self.receive(i), name=f'recv-{i+1}', daemon=True)
             new_thread.start()
             self.thread_recv.append(new_thread)
-        self.send(json.dumps({'tag': 'init', 'status': self.map.get_status(('owner', 'num', 'terrain'))}))
+        self.sends(json.dumps({'tag': 'init', 'status': self.map.get_status(('owner', 'num', 'terrain'))}))
 
     def process_events(self, events):
         if events['mouse-left'] == 'down':
@@ -29,9 +29,13 @@ class Game:
         # update map
         if self.map.clock.get_time() >= 0.5:
             self.map.update()
-            self.send(json.dumps({'tag': 'status', 'status': self.map.get_status()}))
+            self.sends(json.dumps({'tag': 'status', 'status': self.map.get_status()}))
+            for id in range(1, self.mode['num']):
+                self.send(json.dumps({'tag': 'commands', 'commands': self.map.commands[id]}), id)
         # process map moves
         map_commands = self.map.parse_events(events['key-pressed'], events['key-down'])
+        if map_commands['clear']:
+            self.map.clear_command(self.mode['id'])
         self.execute(['move-board', map_commands['move-board']])
         self.execute(['move-cursor', map_commands['move-cursor']])
         # process map
@@ -49,7 +53,17 @@ class Game:
                 self.map.move_cursor(command[1])
         return [None]
 
-    def send(self, msg):
+    def send(self, msg, id):
+        msg_b = bytes(msg, encoding='utf-8')
+        msg_b_len_b = bytes(f'{len(msg_b):10}', encoding='utf-8')
+        try:
+            client = self.mode['clients'][id]
+            client.send(msg_b_len_b)
+            client.send(msg_b)
+        except OSError as e:
+            print(e)
+
+    def sends(self, msg):
         msg_b = bytes(msg, encoding='utf-8')
         msg_b_len_b = bytes(f'{len(msg_b):10}', encoding='utf-8')
         try:
@@ -78,6 +92,8 @@ class Game:
                     msg = json.loads(msg_str)
                     if msg['tag'] == 'move':
                         self.map.commands[id].append((tuple(msg['move'][0]), tuple(msg['move'][1])))
+                    elif msg['tag'] == 'clear':
+                        self.map.clear_command(id)
             print(f'SERVER END receiving FROM CLIENT-{id}...')
         return func
 

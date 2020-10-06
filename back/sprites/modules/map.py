@@ -39,11 +39,15 @@ class Map:
 
     def process_events(self, events):
         if events['mouse-left'] == 'down':
-            self.cursor = self.pos_to_cord(events['mouse-pos'])
+            target = self.pos_to_cord(events['mouse-pos'])
+            if self.cursor is None or target not in self.get_adj_cords(self.cursor, corner=False, trim=False):
+                self.cursor = target
+            else:
+                self.move_cursor((target[0] - self.cursor[0], target[1] - self.cursor[1]))
         return [None]
 
     def parse_events(self, key_pressed, key_down):
-        commands = {'move-board': [0, 0], 'move-cursor': [0, 0]}
+        commands = {'move-board': [0, 0], 'move-cursor': [0, 0], 'clear': False}
         if 'w' in key_pressed:
             commands['move-board'][1] -= 1
         if 'a' in key_pressed:
@@ -60,6 +64,8 @@ class Map:
             commands['move-cursor'][1] += 1
         if 'right' in key_down:
             commands['move-cursor'][0] += 1
+        if 'space' in key_down:
+            commands['clear'] = True
         return commands
 
     def get(self, cord):
@@ -75,11 +81,12 @@ class Map:
     def cord_in_range(self, cord):
         return 0 <= cord[0] < self.dim[0] and 0 <= cord[1] < self.dim[1]
 
-    def get_adj_cords(self, cord):
+    def get_adj_cords(self, cord, corner=True, trim=True):
         return [adj_cord for adj_cord in
-            [(cord[0], cord[1] - 1), (cord[0] - 1, cord[1]), (cord[0], cord[1] + 1), (cord[0] + 1, cord[1]),
-             (cord[0] - 1, cord[1] - 1), (cord[0] - 1, cord[1] + 1), (cord[0] + 1, cord[1] - 1), (cord[0] + 1, cord[1] + 1)]
-            if self.cord_in_range(adj_cord)
+            [(cord[0], cord[1] - 1), (cord[0] - 1, cord[1]), (cord[0], cord[1] + 1), (cord[0] + 1, cord[1])] +
+            ([(cord[0] - 1, cord[1] - 1), (cord[0] - 1, cord[1] + 1), (cord[0] + 1, cord[1] - 1), (cord[0] + 1, cord[1] + 1)]
+            if corner else [])
+            if not trim or self.cord_in_range(adj_cord)
         ]
 
     def pos_to_cord(self, pos):
@@ -134,11 +141,17 @@ class Map:
 
     def refresh(self):
         # refresh visible and player num
-
+        # reset
+        for player in self.players:
+            player['num'] = 0
         for row, col in self.prd:
             self.get((row, col)).visible = False
+        # check
         for row, col in self.prd:
-            if self.get((row, col)).owner == self.id:
+            block = self.get((row, col))
+            if block.owner is not None:
+                self.players[block.owner]['num'] += block.num
+            if block.owner == self.id:
                 self.get((row, col)).visible = True
                 for adj_cord in self.get_adj_cords((row, col)):
                     self.get(adj_cord).visible = True
@@ -166,20 +179,12 @@ class Map:
             utils.min_max(self.pan[1], -self.total_size[1] // 2, self.total_size[1] // 2)
         )
 
-    def clear_commands(self):
-        self.commands = [[] for _ in range(len(self.players))]
+    def clear_command(self, id):
+        self.commands[id] = []
 
-    def show_grid(self, ui, *, pan=(0, 0)):
-        # vertical lines
-        for col in range(self.dim[0] + 1):
-            start = (self.pos[0] + col * self.grid_size, self.pos[1])
-            end = (self.pos[0] + col * self.grid_size, self.pos[1] + self.dim[1] * self.grid_size)
-            ui.show_line(start, end, pan=(self.pan[0] + pan[0], self.pan[1] + pan[1]))
-        # horizontal lines
-        for row in range(self.dim[1] + 1):
-            start = (self.pos[0], self.pos[1] + row * self.grid_size)
-            end = (self.pos[0] + self.dim[0] * self.grid_size, self.pos[1] + row * self.grid_size)
-            ui.show_line(start, end, pan=(self.pan[0] + pan[0], self.pan[1] + pan[1]))
+    def clear_commands(self):
+        for id in range(len(self.players)):
+            self.clear_command(id)
 
     def get_status(self, fields=('owner', 'num')):
         return {
@@ -193,6 +198,38 @@ class Map:
                 self.get(cord).set_prop(field, status[field][i])
         self.refresh()
 
+    def show_grid(self, ui, *, pan=(0, 0)):
+        # vertical lines
+        for col in range(self.dim[0] + 1):
+            start = (self.pos[0] + col * self.grid_size, self.pos[1])
+            end = (self.pos[0] + col * self.grid_size, self.pos[1] + self.dim[1] * self.grid_size)
+            ui.show_line(start, end, pan=(self.pan[0] + pan[0], self.pan[1] + pan[1]))
+        # horizontal lines
+        for row in range(self.dim[1] + 1):
+            start = (self.pos[0], self.pos[1] + row * self.grid_size)
+            end = (self.pos[0] + self.dim[0] * self.grid_size, self.pos[1] + row * self.grid_size)
+            ui.show_line(start, end, pan=(self.pan[0] + pan[0], self.pan[1] + pan[1]))
+
+    def show_commands(self, ui, *, pan=(0, 0)):
+        coms = [set() for _ in range(4)]
+        for com in self.commands[self.id]:
+            adjacent = self.get_adj_cords(com[0], corner=False, trim=False)
+            if com[1] in adjacent:
+                coms[adjacent.index(com[1])].add(com[0])
+        line_lists = [
+            [[(0, -5), (0, -18)], [(-2, -16), (0, -18)], [(2, -16), (0, -18)]],
+            [[(-5, 0), (-18, 0)], [(-16, -2), (-18, 0)], [(-16, 2), (-18, 0)]],
+            [[(0, 5), (0, 18)], [(-2, 16), (0, 18)], [(2, 16), (0, 18)]],
+            [[(5, 0), (18, 0)], [(16, -2), (18, 0)], [(16, 2), (18, 0)]]
+        ]
+        for i in range(4):
+            for com in list(coms[i]):
+                pos = (
+                    self.pos[0] + com[0] * self.grid_size + self.pan[0] + pan[0] + self.grid_size // 2,
+                    self.pos[1] + com[1] * self.grid_size + self.pan[1] + pan[1] + self.grid_size // 2)
+                for line in line_lists[i]:
+                    ui.show_line(line[0], line[1], color=c.white, pan=pos)
+
     def show(self, ui, *, pan=(0, 0)):
         # show blocks
         for row, col in self.prd:
@@ -205,6 +242,8 @@ class Map:
                 (self.pos[0] + self.cursor[0] * self.grid_size, self.pos[1] + self.cursor[1] * self.grid_size),
                 (self.grid_size + 1, self.grid_size + 1), border=1, color=c.white,
                 pan=(self.pan[0] + pan[0], self.pan[1] + pan[1]))
+        # show command
+        self.show_commands(ui, pan=pan)
 
 
 class MapLoader:
@@ -217,8 +256,8 @@ class MapLoader:
                 for col in range(map.dim[1])] for row in range(map.dim[0])]
 
             # init cities and bases
-            special_cords = choices(map.prd, k=60+len(map.players))
-            mountain_cords, city_cords, base_cords = special_cords[:40], special_cords[40:60], special_cords[60:]
+            special_cords = choices(map.prd, k=100+len(map.players))
+            mountain_cords, city_cords, base_cords = special_cords[:80], special_cords[80:100], special_cords[100:]
             for cord in mountain_cords:
                 map.get(cord).terrain = 'mountain'
             for cord in city_cords:

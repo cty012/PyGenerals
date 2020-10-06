@@ -27,10 +27,11 @@ class Game:
     def process_events(self, events):
         if events['mouse-left'] == 'down':
             pass
-        # update map
-        self.map.clear_commands()
         # process map moves
         map_commands = self.map.parse_events(events['key-pressed'], events['key-down'])
+        if map_commands['clear']:
+            self.map.clear_command(self.mode['id'])
+            self.send({'tag': 'clear'})
         self.execute(['move-board', map_commands['move-board']])
         self.execute(['move-cursor', map_commands['move-cursor']])
         # process map
@@ -76,6 +77,8 @@ class Game:
                     self.map.set_status(msg['status'])
                 elif msg['tag'] == 'init':
                     self.map_status = msg['status']
+                elif msg['tag'] == 'commands':
+                    self.map.commands[self.mode['id']] = [(tuple(com[0]), tuple(com[1])) for com in msg['commands']]
         print(f'CLIENT END receiving FROM SERVER...')
 
     def show(self, ui):
