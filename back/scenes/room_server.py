@@ -64,14 +64,13 @@ class Scene:
     def execute(self, name):
         if name == 'play':
             self.status['running'] = False
-            self.mode = {'id': 0, 'num': len(self.clients), 'socket': self.server, 'clients': self.clients}
             # send info to clients
-            client_mode = {item: self.mode[item] for item in self.mode if item != 'connect'}
             for i, client in enumerate(self.clients):
-                client_info = bytes(json.dumps([client_mode, i + 1, len(self.clients) + 1]), encoding='utf-8')
+                print(i, client)
+                client_info = bytes(json.dumps([i + 1, len(self.clients) + 1]), encoding='utf-8')
                 client['socket'].send(bytes(f'{len(client_info):10}', encoding='utf-8'))
                 client['socket'].send(client_info)
-            return ['game', self.mode]
+            return ['game', {'id': 0, 'num': len(self.clients), 'socket': self.server, 'clients': self.clients}]
         elif name == 'back':
             self.close_client_sockets()
             self.status['running'] = False
