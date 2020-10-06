@@ -1,3 +1,4 @@
+from typing import *
 import time
 
 
@@ -57,3 +58,75 @@ class Stopwatch:
         self.start_time = None
         self.end_time = None
         self.interval = 0
+
+
+class Stopwatch_dev:
+    # MARK: Init
+    def __init__(
+            self,
+            start_at: Union[int, float] = 0,
+            run_speed: Union[int, float] = 1
+            ) -> None:
+        self.start_time: Union[int, float, None] = None
+        self.interval: Union[int, float, None] = start_at
+        self.run_speed: Union[int, float] = run_speed
+        self.speed: Union[int, float] = 0
+
+    def set_speed(self, speed: Union[int, float]) -> None:
+        # Optimize: quit if speed does not change
+        if speed == self.speed:
+            return
+
+        # Record uniform perf_counter time to minimize error
+        now = time.perf_counter()
+
+        # Catalog progress in previous speed
+        if self.speed:
+            self.interval = self.speed * (now - self.start_time)
+            self.start_time = None
+
+        # Set 'speed' attribute
+        self.speed = speed
+
+        # Convert back
+        if self.speed:
+            self.start_time = now - self.interval / self.speed
+            self.interval = None
+            self.run_speed = speed
+
+    # MARK: Modifications
+    def start(self, speed: Union[int, float] = ...) -> None:
+        if not isinstance(speed, (int, float)):
+            speed = self.run_speed
+        self.set_speed(speed)
+
+    def stop(self) -> None:
+        self.set_speed(0)
+
+    def toggle_run(self) -> None:
+        if self.speed:
+            self.set_speed(0)
+        else:
+            self.set_speed(self.run_speed)
+
+    def clear(self) -> None:
+        speed = self.speed
+        self.set_speed(0)
+        self.interval = 0
+        self.set_speed(speed)
+
+    # MARK: Queries
+    def is_running(self) -> bool:
+        return self.speed != 0
+
+    def get_time(self) -> Union[int, float]:
+        if self.speed:
+            return self.speed * (time.perf_counter() - self.start_time)
+        return self.interval
+
+    def get_str_time(self) -> str:
+        interval = self.get_time()
+        minutes = int(interval) // 60
+        seconds = int(interval) - minutes * 60
+        decimals = int((interval - int(interval)) * 100)
+        return f'{minutes:02}:{seconds:02}:{decimals:02}'
