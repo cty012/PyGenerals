@@ -4,7 +4,7 @@ import utils.functions as utils
 
 
 class Block:
-    def __init__(self, pos, size, owner, num=0, terrain='blank', *, align=(0, 0)):
+    def __init__(self, pos, size, owner=None, num=0, terrain='blank', *, align=(0, 0)):
         self.size = size
         self.pos = utils.top_left(pos, (self.size, self.size), align=align)
         # contents
@@ -31,24 +31,25 @@ class Block:
             other.num -= (self.num - 1)
             self.num = 1
             if other.num < 0:
-                other.color = self.owner
+                enemy = other.owner
+                other.owner = self.owner
                 other.num = -other.num
-                return [[self.owner, 1], [other.color, -1]]
+                return [[self.owner, 1], [enemy, -1]]
             return []
 
     def show(self, ui, players, *, is_cursor=False, pan=(0, 0)):
         # background
-        if is_cursor:
-            color = c.gray_1
-        elif not self.visible:
+        if not self.visible:
             color = c.gray_2
         elif self.owner is None:
             color = c.gray_0
         else:
-            color = players[self.owner]
+            color = players[self.owner]['color']
         ui.show_div(self.pos, (self.size, self.size), color=color, pan=pan)
         # terrain
         pass
         # number
         if self.num > 0:
-            ui.show_text((self.pos[0] + self.size // 2, self.pos[1] + self.size // 2), self.num, font=f.tnr(18))
+            ui.show_text(
+                (self.pos[0] + self.size // 2, self.pos[1] + self.size // 2),
+                str(self.num), font=f.tnr(18), pan=pan, align=(1, 1))
