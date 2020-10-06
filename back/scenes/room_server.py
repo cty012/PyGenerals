@@ -76,7 +76,7 @@ class Scene:
             self.close_client_sockets()
             self.status['running'] = False
             self.server.close()
-            return ['level']
+            return ['menu']
         return [None]
 
     def close_client_sockets(self):
