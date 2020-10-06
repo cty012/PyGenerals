@@ -38,9 +38,9 @@ class Scene:
             server.bind(('127.0.0.1', 5050))
             server.settimeout(1.0)
             server.listen()
-            return ['game', {'id': 'server', 'socket': server, 'clients': []}]
+            return ['game', {'id': 'server', 'num': 1, 'socket': server, 'clients': []}]
         elif name == 'mult':
-            return ['game', {'id': 'server', 'socket': None, 'clients': []}]
+            return ['game', {'id': 'server', 'num': 1, 'socket': None, 'clients': []}]
         elif name == 'back':
             return ['menu']
         return [None]
