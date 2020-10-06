@@ -75,7 +75,8 @@ class Map:
 
     def get_adj_cords(self, cord):
         return [adj_cord for adj_cord in
-            [(cord[0], cord[1] - 1), (cord[0] - 1, cord[1]), (cord[0], cord[1] + 1), (cord[0] + 1, cord[1])]
+            [(cord[0], cord[1] - 1), (cord[0] - 1, cord[1]), (cord[0], cord[1] + 1), (cord[0] + 1, cord[1]),
+             (cord[0] - 1, cord[1] - 1), (cord[0] - 1, cord[1] + 1), (cord[0] + 1, cord[1] - 1), (cord[0] + 1, cord[1] + 1)]
             if self.cord_in_range(adj_cord)
         ]
 

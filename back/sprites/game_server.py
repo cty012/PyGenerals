@@ -1,5 +1,6 @@
 import json
 import socket
+from threading import Thread
 
 import back.sprites.modules.map as m
 from utils.parser import Parser
@@ -15,6 +16,11 @@ class Game:
         self.map = m.Map(self.args, self.args.get_pos(1, 1), self.players, self.mode['id'], align=(1, 1))
         # connect
         self.status = {'connected': True}
+        self.thread_recv = []
+        for i in range(self.mode['num'] - 1):
+            new_thread = Thread(target=self.receive(i), name=f'recv-{i+1}', daemon=True)
+            new_thread.start()
+            self.thread_recv.append(new_thread)
 
     def process_events(self, events):
         if events['mouse-left'] == 'down':
@@ -54,7 +60,7 @@ class Game:
     def receive(self, id):
         def func():
             parser = Parser()
-            client = self.mode['connect']['clients'][id]
+            client = self.mode['clients'][id]
             print(f'SERVER START receiving FROM C{id}...')
             while self.status['connected']:
                 # receive and parse msg

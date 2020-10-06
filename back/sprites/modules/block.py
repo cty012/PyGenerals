@@ -46,16 +46,17 @@ class Block:
     def show(self, ui, players, *, pan=(0, 0)):
         # background
         if not self.visible:
-            color = c.gray_2
+            color = c.dark_gray
         elif self.owner is None:
-            color = c.gray_0
+            color = {'blank': c.gray_0, 'mountain': c.gray_1, 'city': c.gray_2}[self.terrain]
         else:
             color = players[self.owner]['color']
         ui.show_div(self.pos, (self.size, self.size), color=color, pan=pan)
         # terrain
-        pass
+        if self.visible or self.terrain == 'mountain':
+            pass  # TODO: show terrain
         # number
-        if self.num > 0:
+        if self.visible and self.num > 0:
             ui.show_text(
                 (self.pos[0] + self.size // 2, self.pos[1] + self.size // 2),
                 str(self.num), font=f.tnr(18), pan=pan, align=(1, 1))
