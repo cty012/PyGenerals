@@ -20,16 +20,22 @@ class Block:
     def get_prop(self, prop):
         return eval(f'self.{prop}')
 
+    def fit(self):
+        self.num = min(self.num, 9999)
+        self.num = max(self.num, -9999)
+
     def move(self, other):
         if self.num < 1:
             return []
         elif self.owner == other.owner:
             other.num += (self.num - 1)
             self.num = 1
+            other.fit()
             return []
         else:
             other.num -= (self.num - 1)
             self.num = 1
+            other.fit()
             if other.num < 0:
                 enemy = other.owner
                 other.owner = self.owner
@@ -37,7 +43,7 @@ class Block:
                 return [[self.owner, 1], [enemy, -1]]
             return []
 
-    def show(self, ui, players, *, is_cursor=False, pan=(0, 0)):
+    def show(self, ui, players, *, pan=(0, 0)):
         # background
         if not self.visible:
             color = c.gray_2

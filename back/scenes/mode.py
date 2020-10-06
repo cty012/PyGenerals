@@ -36,7 +36,7 @@ class Scene:
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server.bind(('127.0.0.1', 5050))
-            server.settimeout(1.0)
+            server.settimeout(1.1)
             server.listen()
             return ['game', {'id': 0, 'num': 1, 'socket': server, 'clients': []}]
         elif name == 'mult':

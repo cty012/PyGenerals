@@ -36,19 +36,29 @@ class Map:
         self.commands = [[] for _ in range(len(self.players))]
 
     def process_events(self, events):
-        if self.clock.get_time() >= 0.5:
-            self.update()
         if events['mouse-left'] == 'down':
             self.cursor = self.pos_to_cord(events['mouse-pos'])
-        if 'up' in events['key-down']:
-            self.move_cursor((0, -1))
-        if 'left' in events['key-down']:
-            self.move_cursor((-1, 0))
-        if 'down' in events['key-down']:
-            self.move_cursor((0, 1))
-        if 'right' in events['key-down']:
-            self.move_cursor((1, 0))
         return [None]
+
+    def parse_events(self, key_pressed, key_down):
+        commands = {'move-board': [0, 0], 'move-cursor': [0, 0]}
+        if 'w' in key_pressed:
+            commands['move-board'][1] -= 1
+        if 'a' in key_pressed:
+            commands['move-board'][0] -= 1
+        if 's' in key_pressed:
+            commands['move-board'][1] += 1
+        if 'd' in key_pressed:
+            commands['move-board'][0] += 1
+        if 'up' in key_down:
+            commands['move-cursor'][1] -= 1
+        if 'left' in key_down:
+            commands['move-cursor'][0] -= 1
+        if 'down' in key_down:
+            commands['move-cursor'][1] += 1
+        if 'right' in key_down:
+            commands['move-cursor'][0] += 1
+        return commands
 
     def get(self, cord):
         return self.blocks[cord[0]][cord[1]]
@@ -132,7 +142,9 @@ class Map:
                 if self.get(self.cursor).terrain != 'mountain' and self.get(target).terrain != 'mountain':
                     self.commands[self.id].append((self.cursor, target))
             # move cursor
+            orig_cursor = self.cursor
             self.cursor = target
+            return [orig_cursor, target]
 
     def move_board(self, direction=(0, 0)):
         step = (-11, -11)
@@ -141,6 +153,9 @@ class Map:
             utils.min_max(self.pan[0], -self.total_size[0] // 2, self.total_size[0] // 2),
             utils.min_max(self.pan[1], -self.total_size[1] // 2, self.total_size[1] // 2)
         )
+
+    def clear_commands(self):
+        self.commands = [[] for _ in range(len(self.players))]
 
     def show_grid(self, ui, *, pan=(0, 0)):
         # vertical lines
@@ -157,9 +172,7 @@ class Map:
     def show(self, ui, *, pan=(0, 0)):
         # show blocks
         for row, col in product(range(self.dim[0]), range(self.dim[1])):
-            self.blocks[row][col].show(
-                ui, self.players, is_cursor=(self.cursor == (row, col)),
-                pan=(self.pan[0] + pan[0], self.pan[1] + pan[1]))
+            self.blocks[row][col].show(ui, self.players, pan=(self.pan[0] + pan[0], self.pan[1] + pan[1]))
         # show grid
         self.show_grid(ui, pan=pan)
         # show cursor
@@ -179,12 +192,14 @@ class MapLoader:
             for col in range(map.dim[1])] for row in range(map.dim[0])]
 
         # init cities and bases
-        cities_cords = choices(list(product(range(map.dim[0]), range(map.dim[1]))), k=20+len(map.players))
-        bases_cords = choices(cities_cords, k=len(map.players))
-        for cord in cities_cords:
+        special_cords = choices(list(product(range(map.dim[0]), range(map.dim[1]))), k=60+len(map.players))
+        mountain_cords, city_cords, base_cords = special_cords[:40], special_cords[40:60], special_cords[60:]
+        for cord in mountain_cords:
+            map.get(cord).terrain = 'mountain'
+        for cord in city_cords:
             map.get(cord).terrain = 'city'
             map.get(cord).num = randint(40, 50)
-        for id, cord in enumerate(bases_cords):
+        for id, cord in enumerate(base_cords):
             map.get(cord).terrain = 'base'
             map.get(cord).owner = id
             map.get(cord).num = 1

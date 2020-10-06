@@ -34,6 +34,12 @@ class Stopwatch:
     def is_running(self):
         return self.start_time is not None and self.end_time is None
 
+    def toggle_run(self):
+        if self.is_running():
+            self.stop()
+        else:
+            self.start()
+
     def get_time(self):
         if self.start_time is not None and self.end_time is not None:
             return self.speed * (self.end_time - self.start_time) + self.interval
