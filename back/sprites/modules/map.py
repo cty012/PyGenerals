@@ -173,7 +173,7 @@ class Map:
 
     def skip_commands(self, id, num_skips):
         for i, com in enumerate(self.commands[id]):
-            self.commands[id] = (com[0], com[1], com[2] - num_skips)
+            self.commands[id][i] = (com[0], com[1], com[2] - num_skips)
 
     def move_cursor(self, direction):
         if self.cursor is None:
