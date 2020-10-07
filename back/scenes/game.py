@@ -7,8 +7,11 @@ import back.sprites.modules.game_menu as gm
 class Scene:
     def __init__(self, args, mode):
         self.args = args
-        # server: {'id': 0, 'num': <NUM OF PLAYERS>, 'socket': <SOCKET>, 'clients': [<CLIENT SOCKET>]}
-        # client: {'id': >0, 'num': <NUM OF PLAYERS>, 'socket': <SOCKET>}
+        # server: {
+        #     'id': 0, 'ip', 'num': <NUM OF PLAYERS>, 'socket': <SOCKET>,
+        #     'clients': {'ip': <CLIENT IP>, 'port': <CLIENT PORT>, 'socket': <CLIENT SOCKET>}
+        # }
+        # client: {'id': >0, 'ip', 'num': <NUM OF PLAYERS>, 'socket': <SOCKET>}
         self.mode = mode
         self.background = c.Component(lambda ui: ui.show_div((0, 0), self.args.size, color=(60, 179, 113)))
         # game menu

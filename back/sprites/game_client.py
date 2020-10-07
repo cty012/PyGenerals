@@ -4,6 +4,7 @@ from threading import Thread
 import time
 
 import back.sprites.modules.map as m
+import back.sprites.modules.scoreboard as sb
 from utils.parser import Parser
 
 
@@ -13,7 +14,8 @@ class Game:
         self.mode = mode
         # display
         player_colors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple'][:self.mode['num']]
-        self.players = [{'num': 0, 'color': player_colors[id]} for id in range(self.mode['num'])]
+        self.players = [{'land': 0, 'army': 0, 'color': player_colors[id]} for id in range(self.mode['num'])]
+        self.scoreboard = sb.Scoreboard(self.args, (self.args.size[0] - 10, 10), self.players, align=(2, 0))
         self.map_status = None
         # connect
         self.status = {'connected': True}
@@ -28,14 +30,20 @@ class Game:
         if events['mouse-left'] == 'down':
             pass
         # process map moves
-        map_commands = self.map.parse_events(events['key-pressed'], events['key-down'])
+        map_commands = self.map.parse_key_events(events['key-pressed'], events['key-down'])
         if map_commands['clear']:
             self.map.clear_command(self.mode['id'])
             self.send({'tag': 'clear'})
         self.execute(['move-board', map_commands['move-board']])
         self.execute(['move-cursor', map_commands['move-cursor']])
         # process map
-        return self.execute(self.map.process_events(events))
+        if events['mouse-left'] == 'down':
+            if self.scoreboard.in_range(events['mouse-pos']):
+                return self.execute(self.scoreboard.process_mouse_events(events['mouse-pos']))
+            else:
+                return self.execute(self.map.process_mouse_events(events['mouse-pos']))
+        # pass
+        return [None]
 
     def execute(self, command):
         if command[0] == 'pause':
@@ -74,8 +82,14 @@ class Game:
             for msg_str in msg_strs:
                 msg = json.loads(msg_str)
                 if msg['tag'] == 'status':
+                    # for id in range(self.mode['num']):
+                    #     self.players[id]['land'] = msg['players'][id]['land']
+                    #     self.players[id]['army'] = msg['players'][id]['army']
                     self.map.set_status(msg['status'])
                 elif msg['tag'] == 'init':
+                    # for id in range(self.mode['num']):
+                    #     self.players[id]['land'] = msg['players'][id]['land']
+                    #     self.players[id]['army'] = msg['players'][id]['army']
                     self.map_status = msg['status']
                 elif msg['tag'] == 'commands':
                     self.map.commands[self.mode['id']] = [(tuple(com[0]), tuple(com[1])) for com in msg['commands']]
@@ -83,3 +97,4 @@ class Game:
 
     def show(self, ui):
         self.map.show(ui)
+        self.scoreboard.show(ui)

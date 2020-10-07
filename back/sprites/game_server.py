@@ -3,6 +3,7 @@ import socket
 from threading import Thread
 
 import back.sprites.modules.map as m
+import back.sprites.modules.scoreboard as sb
 from utils.parser import Parser
 
 
@@ -12,7 +13,8 @@ class Game:
         self.mode = mode
         # display
         player_colors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple'][:self.mode['num']]
-        self.players = [{'num': 0, 'color': player_colors[id]} for id in range(self.mode['num'])]
+        self.players = [{'land': 0, 'army': 0, 'color': player_colors[id]} for id in range(self.mode['num'])]
+        self.scoreboard = sb.Scoreboard(self.args, (self.args.size[0] - 10, 10), self.players, align=(2, 0))
         self.map = m.Map(self.args, self.args.get_pos(1, 1), self.players, self.mode['id'], align=(1, 1))
         # connect
         self.status = {'connected': True}
@@ -21,7 +23,10 @@ class Game:
             new_thread = Thread(target=self.receive(i), name=f'recv-{i+1}', daemon=True)
             new_thread.start()
             self.thread_recv.append(new_thread)
-        self.sends(json.dumps({'tag': 'init', 'status': self.map.get_status(('owner', 'num', 'terrain'))}))
+        self.sends(json.dumps({
+            'tag': 'init',
+            # 'player': {prop: [p[prop] for p in self.players] for prop in ['land', 'army']},
+            'status': self.map.get_status(('owner', 'num', 'terrain'))}))
 
     def process_events(self, events):
         if events['mouse-left'] == 'down':
@@ -29,17 +34,24 @@ class Game:
         # update map
         if self.map.clock.get_time() >= 0.5:
             self.map.update()
-            self.sends(json.dumps({'tag': 'status', 'status': self.map.get_status()}))
+            self.sends(json.dumps({
+                'tag': 'status',
+                # 'players': {prop: [p[prop] for p in self.players] for prop in ['land', 'army']},
+                'status': self.map.get_status()}))
             for id in range(1, self.mode['num']):
                 self.send(json.dumps({'tag': 'commands', 'commands': self.map.commands[id]}), id)
         # process map moves
-        map_commands = self.map.parse_events(events['key-pressed'], events['key-down'])
+        map_commands = self.map.parse_key_events(events['key-pressed'], events['key-down'])
         if map_commands['clear']:
             self.map.clear_command(self.mode['id'])
         self.execute(['move-board', map_commands['move-board']])
         self.execute(['move-cursor', map_commands['move-cursor']])
         # process map
-        self.execute(self.map.process_events(events))
+        if events['mouse-left'] == 'down':
+            if self.scoreboard.in_range(events['mouse-pos']):
+                return self.execute(self.scoreboard.process_mouse_events(events['mouse-pos']))
+            else:
+                return self.execute(self.map.process_mouse_events(events['mouse-pos']))
         # pass
         return [None]
 
@@ -58,8 +70,8 @@ class Game:
         msg_b_len_b = bytes(f'{len(msg_b):10}', encoding='utf-8')
         try:
             client = self.mode['clients'][id]
-            client.send(msg_b_len_b)
-            client.send(msg_b)
+            client['socket'].send(msg_b_len_b)
+            client['socket'].send(msg_b)
         except OSError as e:
             print(e)
 
@@ -68,8 +80,8 @@ class Game:
         msg_b_len_b = bytes(f'{len(msg_b):10}', encoding='utf-8')
         try:
             for client in self.mode['clients']:
-                client.send(msg_b_len_b)
-                client.send(msg_b)
+                client['socket'].send(msg_b_len_b)
+                client['socket'].send(msg_b)
         except OSError as e:
             print(e)
 
@@ -81,7 +93,7 @@ class Game:
             while self.status['connected']:
                 # receive and parse msg
                 try:
-                    msg_strs = parser.parse(client.recv(1 << 20))
+                    msg_strs = parser.parse(client['socket'].recv(1 << 20))
                 except socket.timeout:
                     continue
                 except json.decoder.JSONDecodeError:
@@ -99,3 +111,4 @@ class Game:
 
     def show(self, ui):
         self.map.show(ui)
+        self.scoreboard.show(ui)

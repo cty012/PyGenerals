@@ -37,16 +37,15 @@ class Map:
         self.clock.start()
         self.commands = [[] for _ in range(len(self.players))]
 
-    def process_events(self, events):
-        if events['mouse-left'] == 'down':
-            target = self.pos_to_cord(events['mouse-pos'])
-            if self.cursor is None or target not in self.get_adj_cords(self.cursor, corner=False, trim=False):
-                self.cursor = target
-            else:
-                self.move_cursor((target[0] - self.cursor[0], target[1] - self.cursor[1]))
+    def process_mouse_events(self, mouse_pos):
+        target = self.pos_to_cord(mouse_pos)
+        if self.cursor is None or target not in self.get_adj_cords(self.cursor, corner=False, trim=False):
+            self.cursor = target
+        else:
+            self.move_cursor((target[0] - self.cursor[0], target[1] - self.cursor[1]))
         return [None]
 
-    def parse_events(self, key_pressed, key_down):
+    def parse_key_events(self, key_pressed, key_down):
         commands = {'move-board': [0, 0], 'move-cursor': [0, 0], 'clear': False}
         if 'w' in key_pressed:
             commands['move-board'][1] -= 1
@@ -125,9 +124,7 @@ class Map:
                 player_updates = block.move(target)
                 # calc effect of command
                 for p_update in player_updates:
-                    if p_update[0] == 'num-change':
-                        self.players[p_update[1]]['num'] += p_update[2]
-                    elif p_update[0] == 'conquer':
+                    if p_update[0] == 'conquer':
                         for cord in self.prd:
                             block = self.get(cord)
                             if block.owner == p_update[2]:
@@ -143,14 +140,16 @@ class Map:
         # refresh visible and player num
         # reset
         for player in self.players:
-            player['num'] = 0
+            player['land'] = 0
+            player['army'] = 0
         for row, col in self.prd:
             self.get((row, col)).visible = False
         # check
         for row, col in self.prd:
             block = self.get((row, col))
             if block.owner is not None:
-                self.players[block.owner]['num'] += block.num
+                self.players[block.owner]['land'] += 1
+                self.players[block.owner]['army'] += block.num
             if block.owner == self.id:
                 self.get((row, col)).visible = True
                 for adj_cord in self.get_adj_cords((row, col)):
@@ -279,5 +278,5 @@ class MapLoader:
         # init map variables (cities, players, visible)
         map.cities = map.get_blocks_by_prop('terrain', ['base', 'city'])
         for id in range(len(map.players)):
-            map.players[id]['num'] = len(map.get_blocks_by_prop('owner', [id]))
+            map.players[id]['land'] = map.players[id]['army'] = len(map.get_blocks_by_prop('owner', [id]))
         map.refresh()

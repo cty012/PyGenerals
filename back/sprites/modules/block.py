@@ -63,5 +63,5 @@ class Block:
         # number
         if self.visible and self.num > 0:
             ui.show_text(
-                center, str(self.num), f.get_font('quicksand', 15, 'otf'),
+                center, str(self.num), f.get_font('quicksand-bold', 15, 'otf'),
                 color=c.white, save='num', align=(1, 1), pan=pan)

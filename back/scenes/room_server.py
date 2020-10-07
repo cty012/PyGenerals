@@ -71,7 +71,7 @@ class Scene:
                 client['socket'].send(client_info)
             return ['game', {
                 'id': 0, 'num': len(self.clients) + 1, 'socket': self.server,
-                'clients': [client['socket'] for client in self.clients]
+                'clients': self.clients
             }]
         elif name == 'back':
             self.close_client_sockets()
