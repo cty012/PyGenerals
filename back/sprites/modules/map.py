@@ -35,17 +35,16 @@ class Map:
         self.blank_gen = 50
         self.clock = sw.Stopwatch()
         self.clock.start()
-        self.commands = [[] for _ in range(len(self.players))]
 
         # refresh
         self.refresh()
 
-    def process_mouse_events(self, mouse_pos):
+    def process_mouse_events(self, mouse_pos, command):
         target = self.pos_to_cord(mouse_pos)
         if self.cursor is None or target not in self.get_adj_cords(self.cursor, corner=False, trim=False):
             self.cursor = target
         else:
-            self.move_cursor((target[0] - self.cursor[0], target[1] - self.cursor[1]))
+            self.move_cursor((target[0] - self.cursor[0], target[1] - self.cursor[1]), command)
         return [None]
 
     def parse_key_events(self, key_pressed, key_down):
@@ -103,7 +102,7 @@ class Map:
             return (row, col) if self.get((row, col)).in_range(pos, pan=self.pan) else None
         return None
 
-    def update(self):
+    def update(self, command):
         # reset clock
         self.clock.clear()
         self.clock.start()
@@ -120,22 +119,17 @@ class Map:
                     self.get(cord).num += 1
 
         # execute commands
-        skips = [0 for _ in range(len(self.players))]
         for id in range(len(self.players)):
-            while len(self.commands[id]) > 0:
+            com_list = command.command_lists[id]
+            while len(com_list) > 0:
                 # analyze command
-                com = self.commands[id].pop(0)
+                com = com_list.pop(0)
                 block, target = self.get(com[0]), self.get(com[1])
-
                 # skip invalid command
                 if block.owner != id or block.num <= 1:
-                    skips[id] += 1
-                    self.skip_commands(id, 1)
                     continue
-
                 # execute command
                 player_updates = block.move(target)
-
                 # calc effect of command
                 for p_update in player_updates:
                     if p_update[0] == 'conquer':
@@ -145,7 +139,6 @@ class Map:
 
         # refresh
         self.refresh()
-        return ['skip', skips]
 
     def refresh(self):
         # refresh visible, player num, and commands
@@ -167,21 +160,14 @@ class Map:
                 for adj_cord in self.get_adj_cords((row, col)):
                     self.get(adj_cord).visible = True
 
-        # commands
-        while len(self.commands[self.id]) > 0 and self.commands[self.id][0][2] <= self.turn:
-            self.commands[self.id].pop(0)
-
-    def skip_commands(self, id, num_skips):
-        for i, com in enumerate(self.commands[id]):
-            self.commands[id][i] = (com[0], com[1], com[2] - num_skips)
-
-    def move_cursor(self, direction):
+    def move_cursor(self, direction, command):
+        command_list = command.get_own_com_list()
         if self.cursor is None:
             return
         target = (self.cursor[0] + direction[0], self.cursor[1] + direction[1])
 
         def controllable(cord, id):
-            return self.get(cord).owner == id or (len(self.commands[id]) > 0 and cord == self.commands[id][-1][1])
+            return self.get(cord).owner == id or (len(command_list) > 0 and cord == command_list[-1][1])
 
         def not_mountain(cord):
             return self.get(cord).terrain != 'mountain'
@@ -190,8 +176,7 @@ class Map:
         if self.cord_in_range(target):
             if controllable(self.cursor, self.id) and not_mountain(target):
                 # record command
-                com_code = (self.turn + 1) if len(self.commands[self.id]) == 0 else (self.commands[self.id][-1][2] + 1)
-                self.commands[self.id].append((self.cursor, target, com_code))
+                com_code = command.add((self.cursor, target), self.id)
                 # move cursor
                 orig_cursor = self.cursor
                 self.cursor = target
@@ -213,13 +198,6 @@ class Map:
             utils.min_max(self.pan[0], -self.total_size[0] // 2, self.total_size[0] // 2),
             utils.min_max(self.pan[1], -self.total_size[1] // 2, self.total_size[1] // 2)
         )
-
-    def clear_command(self, id):
-        self.commands[id] = []
-
-    def clear_commands(self):
-        for id in range(len(self.players)):
-            self.clear_command(id)
 
     def get_status(self, fields=('owner', 'num')):
         return {
@@ -246,26 +224,6 @@ class Map:
             end = (self.pos[0] + self.dim[0] * self.grid_size, self.pos[1] + row * self.grid_size)
             ui.show_line(start, end, pan=(self.pan[0] + pan[0], self.pan[1] + pan[1]))
 
-    def show_commands(self, ui, *, pan=(0, 0)):
-        coms = [set() for _ in range(4)]
-        for com in self.commands[self.id]:
-            adjacent = self.get_adj_cords(com[0], corner=False, trim=False)
-            if com[1] in adjacent:
-                coms[adjacent.index(com[1])].add(com[0])
-        line_lists = [
-            [[(0, -5), (0, -18)], [(-2, -16), (0, -18)], [(2, -16), (0, -18)]],
-            [[(-5, 0), (-18, 0)], [(-16, -2), (-18, 0)], [(-16, 2), (-18, 0)]],
-            [[(0, 5), (0, 18)], [(-2, 16), (0, 18)], [(2, 16), (0, 18)]],
-            [[(5, 0), (18, 0)], [(16, -2), (18, 0)], [(16, 2), (18, 0)]]
-        ]
-        for i in range(4):
-            for com in list(coms[i]):
-                pos = (
-                    self.pos[0] + com[0] * self.grid_size + self.pan[0] + pan[0] + self.grid_size // 2,
-                    self.pos[1] + com[1] * self.grid_size + self.pan[1] + pan[1] + self.grid_size // 2)
-                for line in line_lists[i]:
-                    ui.show_line(line[0], line[1], color=c.white, pan=pos)
-
     def show(self, ui, *, pan=(0, 0)):
         # show blocks
         for row, col in self.prd:
@@ -278,8 +236,6 @@ class Map:
                 (self.pos[0] + self.cursor[0] * self.grid_size, self.pos[1] + self.cursor[1] * self.grid_size),
                 (self.grid_size + 1, self.grid_size + 1), border=1, color=c.white,
                 pan=(self.pan[0] + pan[0], self.pan[1] + pan[1]))
-        # show command
-        self.show_commands(ui, pan=pan)
 
 
 class MapLoader:

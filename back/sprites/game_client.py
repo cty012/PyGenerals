@@ -3,6 +3,7 @@ import socket
 from threading import Thread
 import time
 
+import back.sprites.modules.command as cm
 import back.sprites.modules.map as m
 import back.sprites.modules.scoreboard as sb
 from utils.parser import Parser
@@ -16,6 +17,7 @@ class Game:
         player_colors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple'][:self.mode['num']]
         self.players = [{'land': 0, 'army': 0, 'color': player_colors[id]} for id in range(self.mode['num'])]
         self.scoreboard = sb.Scoreboard(self.args, (self.args.size[0] - 10, 10), self.players, align=(2, 0))
+        self.command = cm.Command(self.players, self.mode['id'])
         self.map_status = None
         # connect
         self.status = {'connected': True}
@@ -32,7 +34,7 @@ class Game:
         # process map moves
         map_commands = self.map.parse_key_events(events['key-pressed'], events['key-down'])
         if map_commands['clear']:
-            self.map.clear_command(self.mode['id'])
+            self.command.clear_command(self.mode['id'])
             self.send(json.dumps({'tag': 'clear'}))
         self.execute(['move-board', map_commands['move-board']])
         self.execute(['move-cursor', map_commands['move-cursor']])
@@ -41,7 +43,7 @@ class Game:
             if self.scoreboard.in_range(events['mouse-pos']):
                 return self.execute(self.scoreboard.process_mouse_events(events['mouse-pos']))
             else:
-                return self.execute(self.map.process_mouse_events(events['mouse-pos']))
+                return self.execute(self.map.process_mouse_events(events['mouse-pos'], self.command))
         # pass
         return [None]
 
@@ -52,7 +54,7 @@ class Game:
             self.map.move_board(command[1])
         elif command[0] == 'move-cursor':
             if command[1] != [0, 0]:
-                move = self.map.move_cursor(command[1])
+                move = self.map.move_cursor(command[1], self.command)
                 if move is not None:
                     self.send(json.dumps({'tag': 'move', 'move': move}))
         return [None]
@@ -83,15 +85,15 @@ class Game:
                 msg = json.loads(msg_str)
                 if msg['tag'] == 'status':
                     self.map.turn = msg['turn']
+                    self.command.trim(msg['cc'])
                     self.map.set_status(msg['status'])
                 elif msg['tag'] == 'init':
                     self.map_status = msg['status']
                 elif msg['tag'] == 'conquer':
                     self.map.conquer(msg['players'][0], msg['players'][1])
-                elif msg['tag'] == 'skip':
-                    self.map.skip_commands(self.mode['id'], msg['skip'])
         print(f'CLIENT END receiving FROM SERVER...')
 
     def show(self, ui):
         self.map.show(ui)
+        self.command.show(ui, self.map)
         self.scoreboard.show(ui)
