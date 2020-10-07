@@ -37,6 +37,9 @@ class Map:
         self.clock.start()
         self.commands = [[] for _ in range(len(self.players))]
 
+        # refresh
+        self.refresh()
+
     def process_mouse_events(self, mouse_pos):
         target = self.pos_to_cord(mouse_pos)
         if self.cursor is None or target not in self.get_adj_cords(self.cursor, corner=False, trim=False):
@@ -162,8 +165,8 @@ class Map:
                     self.get(adj_cord).visible = True
 
         # commands
-        while len(self.commands) > 0 and self.commands[0][2] <= self.turn:
-            self.commands.pop(0)
+        while len(self.commands[self.id]) > 0 and self.commands[self.id][0][2] <= self.turn:
+            self.commands[self.id].pop(0)
 
     def move_cursor(self, direction):
         if self.cursor is None:
@@ -306,7 +309,6 @@ class MapLoader:
         map.cities = map.get_blocks_by_prop('terrain', ['base', 'city'])
         for id in range(len(map.players)):
             map.players[id]['land'] = map.players[id]['army'] = len(map.get_blocks_by_prop('owner', [id]))
-        map.refresh()
         base = map.get_base(map.id)
         map.pan = (
             map.total_size[0] // 2 - base[0] * map.grid_size - map.grid_size // 2,
