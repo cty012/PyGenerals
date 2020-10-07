@@ -23,10 +23,7 @@ class Game:
             new_thread = Thread(target=self.receive(i), name=f'recv-{i+1}', daemon=True)
             new_thread.start()
             self.thread_recv.append(new_thread)
-        self.sends(json.dumps({
-            'tag': 'init',
-            # 'player': {prop: [p[prop] for p in self.players] for prop in ['land', 'army']},
-            'status': self.map.get_status(('owner', 'num', 'terrain'))}))
+        self.sends(json.dumps({'tag': 'init', 'status': self.map.get_status(('owner', 'num', 'terrain'))}))
 
     def process_events(self, events):
         if events['mouse-left'] == 'down':
@@ -34,12 +31,9 @@ class Game:
         # update map
         if self.map.clock.get_time() >= 0.5:
             self.execute(self.map.update())
-            self.sends(json.dumps({
-                'tag': 'status',
-                # 'players': {prop: [p[prop] for p in self.players] for prop in ['land', 'army']},
-                'status': self.map.get_status()}))
-            for id in range(1, self.mode['num']):
-                self.send(json.dumps({'tag': 'commands', 'commands': self.map.commands[id]}), id)
+            self.sends(json.dumps({'tag': 'status', 'status': self.map.get_status()}))
+            # for id in range(1, self.mode['num']):
+            #     self.send(json.dumps({'tag': 'commands', 'commands': self.map.commands[id]}), id)
         # process map moves
         map_commands = self.map.parse_key_events(events['key-pressed'], events['key-down'])
         if map_commands['clear']:

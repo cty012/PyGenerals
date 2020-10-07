@@ -142,7 +142,7 @@ class Map:
         return [None]
 
     def refresh(self):
-        # refresh visible and player num
+        # refresh visible, player num, and commands
         # reset
         for player in self.players:
             player['land'] = 0
@@ -161,6 +161,10 @@ class Map:
                 for adj_cord in self.get_adj_cords((row, col)):
                     self.get(adj_cord).visible = True
 
+        # commands
+        while len(self.commands) > 0 and self.commands[0][2] <= self.turn:
+            self.commands.pop(0)
+
     def move_cursor(self, direction):
         if self.cursor is None:
             return
@@ -176,7 +180,8 @@ class Map:
         if self.cord_in_range(target):
             if controllable(self.cursor, self.id) and not_mountain(target):
                 # record command
-                self.commands[self.id].append((self.cursor, target))
+                self.commands[self.id].append(
+                    (self.cursor, target, self.turn + 1 if len(self.commands) == 0 else self.commands[-1][1][2] + 1))
                 # move cursor
                 orig_cursor = self.cursor
                 self.cursor = target
