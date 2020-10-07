@@ -183,8 +183,8 @@ class Map:
         if self.cord_in_range(target):
             if controllable(self.cursor, self.id) and not_mountain(target):
                 # record command
-                self.commands[self.id].append(
-                    (self.cursor, target, self.turn + 1 if len(self.commands) == 0 else self.commands[-1][1][2] + 1))
+                com_code = (self.turn + 1) if len(self.commands[self.id]) == 0 else (self.commands[self.id][-1][2] + 1)
+                self.commands[self.id].append((self.cursor, target, com_code))
                 # move cursor
                 orig_cursor = self.cursor
                 self.cursor = target
