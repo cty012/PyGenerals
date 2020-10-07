@@ -128,6 +128,8 @@ class Map:
 
                 # skip invalid command
                 if block.owner != id or block.num <= 1:
+                    for i, com in enumerate(self.commands[id]):
+                        self.commands[id] = (com[0], com[1], com[2] - 1)
                     continue
 
                 # execute command
