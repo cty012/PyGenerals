@@ -2,6 +2,7 @@ import json
 import socket
 from threading import Thread
 
+import back.players.human as h
 import back.sprites.modules.command as cm
 import back.sprites.modules.map as m
 import back.sprites.modules.scoreboard as sb
@@ -17,7 +18,8 @@ class Game:
         self.players = [{'land': 0, 'army': 0, 'color': player_colors[id]} for id in range(self.mode['num'])]
         self.scoreboard = sb.Scoreboard(self.args, (self.args.size[0] - 10, 10), self.players, align=(2, 0))
         self.map = m.Map(self.args, self.args.get_pos(1, 1), self.players, self.mode['id'], align=(1, 1))
-        self.command = cm.Command(self.players, self.mode['id'])
+        self.command = cm.Command(self.args, self.players, self.mode['id'])
+        self.player = h.Human(self.args, self.map)
         # connect
         self.status = {'connected': True}
         self.thread_recv = []
@@ -28,25 +30,17 @@ class Game:
         self.sends(json.dumps({'tag': 'init', 'status': self.map.get_status(('owner', 'num', 'terrain'))}))
 
     def process_events(self, events):
-        if events['mouse-left'] == 'down':
-            pass
         # update map
         if self.map.clock.get_time() >= 0.5:
             self.map.update(self.command)
             self.sends(json.dumps(
                 {'tag': 'status', 'turn': self.map.turn, 'cc': self.command.get_cc(), 'status': self.map.get_status()}))
         # process map moves
-        map_commands = self.map.parse_key_events(events['key-pressed'], events['key-down'])
+        map_commands = self.player.process_events(events)
         if map_commands['clear']:
             self.command.clear_command(self.mode['id'])
         self.execute(['move-board', map_commands['move-board']])
         self.execute(['move-cursor', map_commands['move-cursor']])
-        # process map
-        if events['mouse-left'] == 'down':
-            if self.scoreboard.in_range(events['mouse-pos']):
-                return self.execute(self.scoreboard.process_mouse_events(events['mouse-pos']))
-            else:
-                return self.execute(self.map.process_mouse_events(events['mouse-pos'], self.command))
         # pass
         return [None]
 

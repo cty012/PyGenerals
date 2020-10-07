@@ -39,38 +39,6 @@ class Map:
         # refresh
         self.refresh()
 
-    def process_mouse_events(self, mouse_pos, command):
-        target = self.pos_to_cord(mouse_pos)
-        if self.cursor is None or target not in self.get_adj_cords(self.cursor, corner=False, trim=False):
-            self.cursor = target
-        else:
-            self.move_cursor((target[0] - self.cursor[0], target[1] - self.cursor[1]), command)
-        return [None]
-
-    def parse_key_events(self, key_pressed, key_down):
-        commands = {'move-board': [0, 0], 'move-cursor': [0, 0], 'clear': False}
-        if 'w' in key_pressed:
-            commands['move-board'][1] -= 1
-        if 'a' in key_pressed:
-            commands['move-board'][0] -= 1
-        if 's' in key_pressed:
-            commands['move-board'][1] += 1
-        if 'd' in key_pressed:
-            commands['move-board'][0] += 1
-        if 'up' in key_down:
-            commands['move-cursor'][1] -= 1
-        if 'left' in key_down:
-            commands['move-cursor'][0] -= 1
-        if 'down' in key_down:
-            commands['move-cursor'][1] += 1
-        if 'right' in key_down:
-            commands['move-cursor'][0] += 1
-        if 'space' in key_down:
-            commands['clear'] = True
-        if commands['move-cursor'][0] != 0 and commands['move-cursor'][1] != 0:
-            commands['move-cursor'][1] = 0
-        return commands
-
     def get(self, cord):
         return self.blocks[cord[0]][cord[1]]
 

@@ -3,6 +3,7 @@ import socket
 from threading import Thread
 import time
 
+import back.players.human as h
 import back.sprites.modules.command as cm
 import back.sprites.modules.map as m
 import back.sprites.modules.scoreboard as sb
@@ -17,7 +18,7 @@ class Game:
         player_colors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple'][:self.mode['num']]
         self.players = [{'land': 0, 'army': 0, 'color': player_colors[id]} for id in range(self.mode['num'])]
         self.scoreboard = sb.Scoreboard(self.args, (self.args.size[0] - 10, 10), self.players, align=(2, 0))
-        self.command = cm.Command(self.players, self.mode['id'])
+        self.command = cm.Command(self.args, self.players, self.mode['id'])
         self.map_status = None
         # connect
         self.status = {'connected': True}
@@ -27,23 +28,16 @@ class Game:
         while self.map_status is None:
             time.sleep(0.01)
         self.map = m.Map(self.args, self.args.get_pos(1, 1), self.players, self.mode['id'], map_status=self.map_status, align=(1, 1))
+        self.player = h.Human(self.args, self.map)
 
     def process_events(self, events):
-        if events['mouse-left'] == 'down':
-            pass
-        # process map moves
-        map_commands = self.map.parse_key_events(events['key-pressed'], events['key-down'])
+        # process map
+        map_commands = self.player.process_events(events)
         if map_commands['clear']:
             self.command.clear_command(self.mode['id'])
             self.send(json.dumps({'tag': 'clear'}))
         self.execute(['move-board', map_commands['move-board']])
         self.execute(['move-cursor', map_commands['move-cursor']])
-        # process map
-        if events['mouse-left'] == 'down':
-            if self.scoreboard.in_range(events['mouse-pos']):
-                return self.execute(self.scoreboard.process_mouse_events(events['mouse-pos']))
-            else:
-                return self.execute(self.map.process_mouse_events(events['mouse-pos'], self.command))
         # pass
         return [None]
 

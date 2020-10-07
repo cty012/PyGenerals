@@ -2,7 +2,8 @@ import utils.colors as c
 
 
 class Command:
-    def __init__(self, players, id):
+    def __init__(self, args, players, id):
+        self.args = args
         self.players = players
         self.id = id
         self.command_codes = [0 for _ in range(len(self.players))]

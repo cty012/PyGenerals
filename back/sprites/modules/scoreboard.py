@@ -14,9 +14,6 @@ class Scoreboard:
         return self.pos[0] < pos[0] < self.pos[0] + self.size[0] and \
                self.pos[1] < pos[1] < self.pos[1] + self.size[1]
 
-    def process_mouse_events(self, mouse_pos):
-        return [None]
-
     def show(self, ui, *, pan=(0, 0)):
         # background
         ui.show_div(self.pos, self.size, color=c.white, pan=pan)
