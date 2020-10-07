@@ -188,7 +188,7 @@ class Map:
                 # move cursor
                 orig_cursor = self.cursor
                 self.cursor = target
-                return [orig_cursor, target]
+                return [orig_cursor, target, com_code]
             self.cursor = target
 
     def conquer(self, p1, p2):

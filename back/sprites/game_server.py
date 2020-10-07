@@ -99,8 +99,9 @@ class Game:
                 for msg_str in msg_strs:
                     msg = json.loads(msg_str)
                     if msg['tag'] == 'move':
+                        print(msg['move'])
                         self.map.commands[id].append(
-                            (tuple(msg['move'][0]), tuple(msg['move'][1]), tuple(msg['move'][2])))
+                            (tuple(msg['move'][0]), tuple(msg['move'][1]), msg['move'][2]))
                     elif msg['tag'] == 'clear':
                         self.map.clear_command(id)
             print(f'SERVER END receiving FROM CLIENT-{id}...')
