@@ -109,6 +109,7 @@ class Map:
 
         # refresh
         self.refresh()
+        return [None]
 
     def refresh(self):
         # refresh visible, player num, and commands

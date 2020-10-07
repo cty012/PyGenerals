@@ -32,7 +32,7 @@ class Game:
     def process_events(self, events):
         # update map
         if self.map.clock.get_time() >= 0.5:
-            self.map.update(self.command)
+            self.execute(self.map.update(self.command))
             for id in range(1, self.mode['num']):
                 self.send(json.dumps({
                     'tag': 'status', 'turn': self.map.turn, 'cc': self.command.get_lowest_cc(id),
