@@ -32,18 +32,19 @@ class Scoreboard:
             (x + self.size[0] - 30, y + 20), 'Land', font=f.get_font('quicksand', 18, 'otf'),
             color=c.black, save='scoreboard-header', align=(1, 1), pan=pan)
         # player info & horizontal grid
-        for id in range(len(self.players)):
+        players = sorted(enumerate(self.players), key=lambda p: (p[1]['army'], p[1]['land']))
+        for id, player in players:
             y += 40
-            ui.show_div((x, y), (self.size[0] - 120, 40), color=self.players[id]['color'], pan=pan)
+            ui.show_div((x, y), (self.size[0] - 120, 40), color=player['color'], pan=pan)
             ui.show_line((x, y), (x + self.size[0], y), pan=pan)
             ui.show_text(
                 (x + (self.size[0] - 120) // 2, y + 20), str(id), font=f.get_font('quicksand-bold', 20, 'otf'),
                 color=c.white, save='scoreboard-name', align=(1, 1), pan=pan)
             ui.show_text(
-                (x + self.size[0] - 90, y + 20), str(self.players[id]['army']),
+                (x + self.size[0] - 90, y + 20), str(player['army']),
                 font=f.get_font('quicksand', 18, 'otf'), color=c.black, save='scoreboard-num', align=(1, 1), pan=pan)
             ui.show_text(
-                (x + self.size[0] - 30, y + 20), str(self.players[id]['land']),
+                (x + self.size[0] - 30, y + 20), str(player['land']),
                 font=f.get_font('quicksand', 18, 'otf'), color=c.black, save='scoreboard-num', align=(1, 1), pan=pan)
         # vertical grid
         ui.show_line(

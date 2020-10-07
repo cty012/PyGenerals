@@ -33,7 +33,7 @@ class Game:
             pass
         # update map
         if self.map.clock.get_time() >= 0.5:
-            self.map.update()
+            self.execute(self.map.update())
             self.sends(json.dumps({
                 'tag': 'status',
                 # 'players': {prop: [p[prop] for p in self.players] for prop in ['land', 'army']},
@@ -63,6 +63,8 @@ class Game:
         elif command[0] == 'move-cursor':
             if command[1] != [0, 0]:
                 self.map.move_cursor(command[1])
+        elif command[0] == 'conquer':
+            self.sends(json.dumps({'tag': 'conquer', 'players': [command[1], command[2]]}))
         return [None]
 
     def send(self, msg, id):

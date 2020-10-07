@@ -77,6 +77,11 @@ class Map:
                 blocks.append((row, col))
         return blocks
 
+    def get_base(self, id):
+        for row, col in self.prd:
+            if self.get((row, col)).owner == id and self.get((row, col)).terrain == 'base':
+                return row, col
+
     def cord_in_range(self, cord):
         return 0 <= cord[0] < self.dim[0] and 0 <= cord[1] < self.dim[1]
 
@@ -125,16 +130,13 @@ class Map:
                 # calc effect of command
                 for p_update in player_updates:
                     if p_update[0] == 'conquer':
-                        for cord in self.prd:
-                            block = self.get(cord)
-                            if block.owner == p_update[2]:
-                                block.owner = p_update[1]
-                                if block.terrain == 'base':
-                                    block.terrain = 'city'
+                        self.conquer(p_update[1], p_update[2])
+                        return ['conquer', p_update[1], p_update[2]]
                 break
 
         # refresh
         self.refresh()
+        return [None]
 
     def refresh(self):
         # refresh visible and player num
@@ -169,6 +171,14 @@ class Map:
             orig_cursor = self.cursor
             self.cursor = target
             return [orig_cursor, target]
+
+    def conquer(self, p1, p2):
+        for cord in self.prd:
+            block = self.get(cord)
+            if block.owner == p2:
+                block.owner = p1
+                if block.terrain == 'base':
+                    block.terrain = 'city'
 
     def move_board(self, direction=(0, 0)):
         step = (-11, -11)
@@ -280,3 +290,7 @@ class MapLoader:
         for id in range(len(map.players)):
             map.players[id]['land'] = map.players[id]['army'] = len(map.get_blocks_by_prop('owner', [id]))
         map.refresh()
+        base = map.get_base(map.id)
+        map.pan = (
+            map.total_size[0] // 2 - base[0] * map.grid_size - map.grid_size // 2,
+            map.total_size[1] // 2 - base[1] * map.grid_size - map.grid_size // 2)

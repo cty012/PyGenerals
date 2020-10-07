@@ -82,17 +82,13 @@ class Game:
             for msg_str in msg_strs:
                 msg = json.loads(msg_str)
                 if msg['tag'] == 'status':
-                    # for id in range(self.mode['num']):
-                    #     self.players[id]['land'] = msg['players'][id]['land']
-                    #     self.players[id]['army'] = msg['players'][id]['army']
                     self.map.set_status(msg['status'])
                 elif msg['tag'] == 'init':
-                    # for id in range(self.mode['num']):
-                    #     self.players[id]['land'] = msg['players'][id]['land']
-                    #     self.players[id]['army'] = msg['players'][id]['army']
                     self.map_status = msg['status']
                 elif msg['tag'] == 'commands':
                     self.map.commands[self.mode['id']] = [(tuple(com[0]), tuple(com[1])) for com in msg['commands']]
+                elif msg['tag'] == 'conquer':
+                    self.map.conquer(msg['players'][0], msg['players'][1])
         print(f'CLIENT END receiving FROM SERVER...')
 
     def show(self, ui):
