@@ -31,9 +31,7 @@ class Game:
         # update map
         if self.map.clock.get_time() >= 0.5:
             self.execute(self.map.update())
-            self.sends(json.dumps({'tag': 'status', 'status': self.map.get_status()}))
-            # for id in range(1, self.mode['num']):
-            #     self.send(json.dumps({'tag': 'commands', 'commands': self.map.commands[id]}), id)
+            self.sends(json.dumps({'tag': 'status', 'turn': self.map.turn, 'status': self.map.get_status()}))
         # process map moves
         map_commands = self.map.parse_key_events(events['key-pressed'], events['key-down'])
         if map_commands['clear']:
@@ -99,7 +97,6 @@ class Game:
                 for msg_str in msg_strs:
                     msg = json.loads(msg_str)
                     if msg['tag'] == 'move':
-                        print(msg['move'])
                         self.map.commands[id].append(
                             (tuple(msg['move'][0]), tuple(msg['move'][1]), msg['move'][2]))
                     elif msg['tag'] == 'clear':

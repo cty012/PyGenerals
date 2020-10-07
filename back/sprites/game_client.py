@@ -82,6 +82,7 @@ class Game:
             for msg_str in msg_strs:
                 msg = json.loads(msg_str)
                 if msg['tag'] == 'status':
+                    self.map.turn = msg['turn']
                     self.map.set_status(msg['status'])
                 elif msg['tag'] == 'init':
                     self.map_status = msg['status']
