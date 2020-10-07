@@ -50,6 +50,7 @@ class Block:
 
     def show(self, ui, players, *, pan=(0, 0)):
         center = (self.pos[0] + self.size // 2, self.pos[1] + self.size // 2)
+
         # background
         if not self.visible:
             color = c.dark_gray
@@ -58,9 +59,17 @@ class Block:
         else:
             color = players[self.owner]['color']
         ui.show_div(self.pos, (self.size, self.size), color=color, pan=pan)
+
         # terrain
-        if self.terrain != 'blank' and (self.visible or self.terrain == 'mountain'):
-            ui.show_img_by_path(center, f'{self.terrain}.png', align=(1, 1), pan=pan)  # TODO: show terrain
+        final_terrain = {
+            'blank': None,
+            'base': 'base' if self.visible else None,
+            'city': 'city' if self.visible else 'mountain',
+            'mountain': 'mountain'
+        }[self.terrain]
+        if final_terrain is not None:
+            ui.show_img_by_path(center, f'{final_terrain}.png', align=(1, 1), pan=pan)
+
         # number
         if self.visible and self.num > 0:
             ui.show_text(
