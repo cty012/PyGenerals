@@ -33,8 +33,10 @@ class Game:
         # update map
         if self.map.clock.get_time() >= 0.5:
             self.map.update(self.command)
-            self.sends(json.dumps(
-                {'tag': 'status', 'turn': self.map.turn, 'cc': self.command.get_cc(), 'status': self.map.get_status()}))
+            for id in range(1, self.mode['num']):
+                self.send(json.dumps({
+                    'tag': 'status', 'turn': self.map.turn, 'cc': self.command.get_lowest_cc(id),
+                    'status': self.map.get_status()}), id)
         # process map moves
         map_commands = self.player.process_events(events)
         if map_commands['clear']:

@@ -19,8 +19,9 @@ class Command:
     def get_own_com_list(self):
         return self.command_lists[self.id]
 
-    def get_cc(self, id=None):
-        return self.command_codes[self.id if id is None else id]
+    def get_lowest_cc(self, id=None):
+        id = self.id if id is None else id
+        return self.command_codes[id] if len(self.command_lists[id]) == 0 else self.command_lists[id][0][2]
 
     def clear_command(self, id):
         self.command_lists[id] = []

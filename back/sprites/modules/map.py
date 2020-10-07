@@ -10,6 +10,7 @@ import utils.stopwatch as sw
 class Map:
     def __init__(self, args, pos, players, id, dim=(29, 24), *, map_status=None, align=(0, 0)):
         self.args = args
+        self.id = id
         self.dim = dim
         self.prd = tuple(product(range(self.dim[0]), range(self.dim[1])))
         self.eprd = tuple(enumerate(self.prd))
@@ -20,12 +21,11 @@ class Map:
         self.pos = utils.top_left(pos, self.total_size, align=align)
         self.pan = (0, 0)
 
-        # blocks
+        # cursor and blocks
         self.cursor = None
         self.blocks = None
         self.cities = None
         self.players = players
-        self.id = id
         MapLoader.init_blocks(self, map_status=map_status)
 
         # update
@@ -154,14 +154,6 @@ class Map:
                 return [orig_cursor, target, com_code]
             self.cursor = target
 
-    def conquer(self, p1, p2):
-        for cord in self.prd:
-            block = self.get(cord)
-            if block.owner == p2:
-                block.owner = p1
-                if block.terrain == 'base':
-                    block.terrain = 'city'
-
     def move_board(self, direction=(0, 0)):
         step = (-11, -11)
         self.pan = (self.pan[0] + step[0] * direction[0], self.pan[1] + step[1] * direction[1])
@@ -169,6 +161,14 @@ class Map:
             utils.min_max(self.pan[0], -self.total_size[0] // 2, self.total_size[0] // 2),
             utils.min_max(self.pan[1], -self.total_size[1] // 2, self.total_size[1] // 2)
         )
+
+    def conquer(self, p1, p2):
+        for cord in self.prd:
+            block = self.get(cord)
+            if block.owner == p2:
+                block.owner = p1
+                if block.terrain == 'base':
+                    block.terrain = 'city'
 
     def get_status(self, fields=('owner', 'num')):
         return {
