@@ -122,11 +122,14 @@ class Map:
                 # analyze command
                 com = self.commands[id].pop(0)
                 block, target = self.get(com[0]), self.get(com[1])
+
                 # skip invalid command
                 if block.owner != id or block.num <= 1:
                     continue
+
                 # execute command
                 player_updates = block.move(target)
+
                 # calc effect of command
                 for p_update in player_updates:
                     if p_update[0] == 'conquer':
@@ -146,6 +149,7 @@ class Map:
             player['army'] = 0
         for row, col in self.prd:
             self.get((row, col)).visible = False
+
         # check
         for row, col in self.prd:
             block = self.get((row, col))
@@ -161,12 +165,17 @@ class Map:
         if self.cursor is None:
             return
         target = (self.cursor[0] + direction[0], self.cursor[1] + direction[1])
-        if self.cord_in_range(target):
+
+        def controllable(cord, id):
+            return self.get(cord).owner == id or (len(self.commands[id]) > 0 and cord == self.commands[id][-1][1])
+
+        def not_mountain(cord):
+            return self.get(cord).terrain != 'mountain'
+
+        # valid target & cursor's block is controllable & not mountain
+        if self.cord_in_range(target) and controllable(self.cursor, id) and not_mountain(target):
             # record command
-            if self.get(self.cursor).owner == self.id or \
-                    (len(self.commands[self.id]) > 0 and self.cursor == self.commands[self.id][-1][1]):
-                if self.get(self.cursor).terrain != 'mountain' and self.get(target).terrain != 'mountain':
-                    self.commands[self.id].append((self.cursor, target))
+            self.commands[self.id].append((self.cursor, target))
             # move cursor
             orig_cursor = self.cursor
             self.cursor = target
@@ -213,6 +222,7 @@ class Map:
             start = (self.pos[0] + col * self.grid_size, self.pos[1])
             end = (self.pos[0] + col * self.grid_size, self.pos[1] + self.dim[1] * self.grid_size)
             ui.show_line(start, end, pan=(self.pan[0] + pan[0], self.pan[1] + pan[1]))
+
         # horizontal lines
         for row in range(self.dim[1] + 1):
             start = (self.pos[0], self.pos[1] + row * self.grid_size)

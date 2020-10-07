@@ -33,7 +33,7 @@ class Game:
         map_commands = self.map.parse_key_events(events['key-pressed'], events['key-down'])
         if map_commands['clear']:
             self.map.clear_command(self.mode['id'])
-            self.send({'tag': 'clear'})
+            self.send(json.dumps({'tag': 'clear'}))
         self.execute(['move-board', map_commands['move-board']])
         self.execute(['move-cursor', map_commands['move-cursor']])
         # process map
