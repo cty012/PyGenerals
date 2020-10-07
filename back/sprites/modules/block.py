@@ -44,6 +44,7 @@ class Block:
                 other.owner = self.owner
                 other.num = -other.num
                 if other.terrain == 'base':
+                    other.terrain = 'city'
                     return [['conquer', self.owner, enemy]]
             return []
 
