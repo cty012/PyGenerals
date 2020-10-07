@@ -120,6 +120,7 @@ class Map:
                     self.get(cord).num += 1
 
         # execute commands
+        skips = [0 for _ in range(len(self.players))]
         for id in range(len(self.players)):
             while len(self.commands[id]) > 0:
                 # analyze command
@@ -128,8 +129,8 @@ class Map:
 
                 # skip invalid command
                 if block.owner != id or block.num <= 1:
-                    for i, com in enumerate(self.commands[id]):
-                        self.commands[id] = (com[0], com[1], com[2] - 1)
+                    skips[id] += 1
+                    self.skip_commands(id, 1)
                     continue
 
                 # execute command
@@ -144,7 +145,7 @@ class Map:
 
         # refresh
         self.refresh()
-        return [None]
+        return ['skip', skips]
 
     def refresh(self):
         # refresh visible, player num, and commands
@@ -169,6 +170,10 @@ class Map:
         # commands
         while len(self.commands[self.id]) > 0 and self.commands[self.id][0][2] <= self.turn:
             self.commands[self.id].pop(0)
+
+    def skip_commands(self, id, num_skips):
+        for i, com in enumerate(self.commands[id]):
+            self.commands[id] = (com[0], com[1], com[2] - num_skips)
 
     def move_cursor(self, direction):
         if self.cursor is None:

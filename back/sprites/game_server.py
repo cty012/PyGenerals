@@ -57,6 +57,9 @@ class Game:
                 self.map.move_cursor(command[1])
         elif command[0] == 'conquer':
             self.sends(json.dumps({'tag': 'conquer', 'players': [command[1], command[2]]}))
+        elif command[0] == 'skip':
+            for id in range(1, self.mode['num']):
+                self.send(json.dumps({'tag': 'skip', 'skip': command[1][id]}), id)
         return [None]
 
     def send(self, msg, id):

@@ -86,10 +86,10 @@ class Game:
                     self.map.set_status(msg['status'])
                 elif msg['tag'] == 'init':
                     self.map_status = msg['status']
-                elif msg['tag'] == 'commands':
-                    self.map.commands[self.mode['id']] = [(tuple(com[0]), tuple(com[1]), tuple(com[2])) for com in msg['commands']]
                 elif msg['tag'] == 'conquer':
                     self.map.conquer(msg['players'][0], msg['players'][1])
+                elif msg['tag'] == 'skip':
+                    self.map.skip_commands(self.mode['id'], msg['skip'])
         print(f'CLIENT END receiving FROM SERVER...')
 
     def show(self, ui):
