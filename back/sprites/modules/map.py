@@ -173,13 +173,15 @@ class Map:
             return self.get(cord).terrain != 'mountain'
 
         # valid target & cursor's block is controllable & not mountain
-        if self.cord_in_range(target) and controllable(self.cursor, self.id) and not_mountain(target):
-            # record command
-            self.commands[self.id].append((self.cursor, target))
-            # move cursor
-            orig_cursor = self.cursor
+        if self.cord_in_range(target):
+            if controllable(self.cursor, self.id) and not_mountain(target):
+                # record command
+                self.commands[self.id].append((self.cursor, target))
+                # move cursor
+                orig_cursor = self.cursor
+                self.cursor = target
+                return [orig_cursor, target]
             self.cursor = target
-            return [orig_cursor, target]
 
     def conquer(self, p1, p2):
         for cord in self.prd:
