@@ -67,6 +67,8 @@ class Map:
             commands['move-cursor'][0] += 1
         if 'space' in key_down:
             commands['clear'] = True
+        if commands['move-cursor'][0] != 0 and commands['move-cursor'][1] != 0:
+            commands['move-cursor'][1] = 0
         return commands
 
     def get(self, cord):
@@ -161,9 +163,10 @@ class Map:
                     self.get(adj_cord).visible = True
 
     def move_cursor(self, direction, command):
-        command_list = command.get_own_com_list()
         if self.cursor is None:
             return
+
+        command_list = command.get_own_com_list()
         target = (self.cursor[0] + direction[0], self.cursor[1] + direction[1])
 
         def controllable(cord, id):
