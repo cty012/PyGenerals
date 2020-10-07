@@ -32,7 +32,7 @@ class Scoreboard:
             (x + self.size[0] - 30, y + 20), 'Land', font=f.get_font('quicksand', 18, 'otf'),
             color=c.black, save='scoreboard-header', align=(1, 1), pan=pan)
         # player info & horizontal grid
-        players = sorted(enumerate(self.players), key=lambda p: (p[1]['army'], p[1]['land']))
+        players = sorted(enumerate(self.players), key=lambda p: (p[1]['army'], p[1]['land'], -p[0]), reverse=True)
         for id, player in players:
             y += 40
             ui.show_div((x, y), (self.size[0] - 120, 40), color=player['color'], pan=pan)
