@@ -35,7 +35,7 @@ class GameMenu:
         if name == 'continue':
             return ['pause']
         elif name == 'quit':
-            return ['quit']
+            return ['close']
         return [None]
 
     def show(self, ui, *, pan=(0, 0)):

@@ -21,10 +21,10 @@ class Game:
         self.command = cm.Command(self.args, self.players, self.mode['id'])
         self.player = h.Human(self.args, self.map)
         # connect
-        self.status = {'connected': True}
+        self.status = {'connected': [False if id == 0 else True for id in range(self.mode['num'])], 'running': True}
         self.thread_recv = []
-        for i in range(1, self.mode['num']):
-            new_thread = Thread(target=self.receive(i), name=f'recv-{i+1}', daemon=True)
+        for id in range(1, self.mode['num']):
+            new_thread = Thread(target=self.receive(id), name=f'recv-{id}', daemon=True)
             new_thread.start()
             self.thread_recv.append(new_thread)
         self.sends(json.dumps({'tag': 'init', 'status': self.map.get_status(('owner', 'num', 'terrain'))}))
@@ -56,6 +56,13 @@ class Game:
                 self.map.move_cursor(command[1], self.command)
         elif command[0] == 'conquer':
             self.sends(json.dumps({'tag': 'conquer', 'players': [command[1], command[2]]}))
+        elif command[0] == 'close':
+            if self.mode['num'] > 1:
+                for id in range(1, self.mode['num']):
+                    if self.status['connected'][id]:
+                        self.send(json.dumps({'tag': 'close'}), id)
+                        self.status['connected'][id] = False
+            self.close()
         return [None]
 
     def send(self, msg, id):
@@ -83,7 +90,7 @@ class Game:
             parser = Parser()
             client = self.mode['clients'][id-1]
             print(f'SERVER START receiving FROM CLIENT-{id}...')
-            while self.status['connected']:
+            while self.status['connected'][id]:
                 # receive and parse msg
                 try:
                     msg_strs = parser.parse(client['socket'].recv(1 << 20))
@@ -95,12 +102,18 @@ class Game:
                 # deal with msg
                 for msg_str in msg_strs:
                     msg = json.loads(msg_str)
+                    if msg['tag'] == 'close':
+                        self.status['connected'][id] = False
                     if msg['tag'] == 'move':
                         self.command.add((tuple(msg['move'][0]), tuple(msg['move'][1]), msg['move'][2]), id)
                     elif msg['tag'] == 'clear':
                         self.command.clear_command(id)
             print(f'SERVER END receiving FROM CLIENT-{id}...')
         return func
+
+    def close(self):
+        self.mode['socket'].close()
+        self.status['running'] = False
 
     def show(self, ui):
         self.map.show(ui)

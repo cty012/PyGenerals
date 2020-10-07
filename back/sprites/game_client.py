@@ -21,7 +21,7 @@ class Game:
         self.command = cm.Command(self.args, self.players, self.mode['id'])
         self.map_status = None
         # connect
-        self.status = {'connected': True}
+        self.status = {'connected': True, 'running': True}
         self.thread_recv = Thread(target=self.receive, name='recv', daemon=True)
         self.thread_recv.start()
         # map
@@ -51,6 +51,9 @@ class Game:
                 move = self.map.move_cursor(command[1], self.command)
                 if move is not None:
                     self.send(json.dumps({'tag': 'move', 'move': move}))
+        elif command[0] == 'close':
+            self.send(json.dumps({'tag': 'close'}))
+            self.close()
         return [None]
 
     def send(self, msg):
@@ -77,7 +80,9 @@ class Game:
             # deal with msg
             for msg_str in msg_strs:
                 msg = json.loads(msg_str)
-                if msg['tag'] == 'status':
+                if msg['tag'] == 'close':
+                    self.close()
+                elif msg['tag'] == 'status':
                     self.map.turn = msg['turn']
                     self.map.set_status(msg['status'])
                     self.command.trim(msg['cc'])
@@ -86,6 +91,12 @@ class Game:
                 elif msg['tag'] == 'conquer':
                     self.map.conquer(msg['players'][0], msg['players'][1])
         print(f'CLIENT END receiving FROM SERVER...')
+
+    def close(self):
+        self.status['connected'] = False
+        self.mode['socket'].shutdown(2)
+        self.mode['socket'].close()
+        self.status['running'] = False
 
     def show(self, ui):
         self.map.show(ui)
