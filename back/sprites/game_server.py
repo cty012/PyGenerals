@@ -11,7 +11,7 @@ from utils.parser import Parser
 
 
 class Game:
-    def __init__(self, args, mode):
+    def __init__(self, args, mode, init_status=None):
         self.args = args
         self.name = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
         self.mode = mode
@@ -19,7 +19,8 @@ class Game:
         player_colors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple'][:self.mode['num']]
         self.players = [{'land': 0, 'army': 0, 'color': player_colors[id]} for id in range(self.mode['num'])]
         self.scoreboard = sb.Scoreboard(self.args, (self.args.size[0] - 10, 10), self.players, align=(2, 0))
-        self.map = m.Map(self.args, self.args.get_pos(1, 1), self.players, self.mode['id'], align=(1, 1))
+        self.map = m.Map(
+            self.args, self.args.get_pos(1, 1), self.players, self.mode['id'], map_status=init_status, align=(1, 1))
         self.command = cm.Command(self.args, self.players, self.mode['id'])
         self.player = h.Human(self.args, self.map)
         # connect
@@ -30,7 +31,7 @@ class Game:
             new_thread = Thread(target=self.receive(id), name=f'recv-{id}', daemon=True)
             new_thread.start()
             self.thread_recv.append(new_thread)
-        self.sends(json.dumps({'tag': 'init', 'status': self.map.get_status(('owner', 'num', 'terrain'))}))
+        self.sends(json.dumps({'tag': 'init', 'status': self.map.init_status}))
 
     def process_events(self, events):
         # update map
@@ -65,7 +66,7 @@ class Game:
                 if alive[0] == self.mode['id']:
                     self.status['win'] = True
                 else:
-                    self.status['lose'] = False
+                    self.status['win'] = False
         elif command[0] == 'close':
             if self.mode['num'] > 1:
                 for id in range(1, self.mode['num']):
@@ -130,6 +131,7 @@ class Game:
             'name': self.name,
             'num': self.mode['num'],
             'turn': self.map.turn,
+            'init-status': self.map.init_status,
             'record': self.map.record
         }
 

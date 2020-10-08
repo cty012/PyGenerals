@@ -92,11 +92,10 @@ class Game:
                     self.map.conquer(msg['players'][0], msg['players'][1])
                     alive = self.map.get_alive()
                     if len(alive) == 1:
-                        if len(alive) == 1:
-                            if alive[0] == self.mode['id']:
-                                self.status['win'] = True
-                            else:
-                                self.status['win'] = False
+                        if alive[0] == self.mode['id']:
+                            self.status['win'] = True
+                        else:
+                            self.status['win'] = False
         print(f'CLIENT END receiving FROM SERVER...')
 
     def close(self):

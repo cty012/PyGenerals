@@ -26,6 +26,7 @@ class Map:
         self.blocks = None
         self.cities = None
         self.players = players
+        self.init_status = None
         MapLoader.init_blocks(self, map_status=map_status)
 
         # update
@@ -226,32 +227,15 @@ class Map:
 class MapLoader:
     @classmethod
     def init_blocks(cls, map, *, map_status):
-        if map_status is None:
-            # init blocks
-            map.blocks = [[
-                b.Block((map.pos[0] + row * map.grid_size, map.pos[1] + col * map.grid_size), map.grid_size)
-                for col in range(map.dim[1])] for row in range(map.dim[0])]
+        map_status = cls.generate_map_status(map.dim, len(map.players)) if map_status is None else map_status
+        map.init_status = map_status
 
-            # init cities and bases
-            special_cords = choices(map.prd, k=100+len(map.players))
-            mountain_cords, city_cords, base_cords = special_cords[:80], special_cords[80:100], special_cords[100:]
-            for cord in mountain_cords:
-                map.get(cord).terrain = 'mountain'
-            for cord in city_cords:
-                map.get(cord).terrain = 'city'
-                map.get(cord).num = randint(40, 50)
-            for id, cord in enumerate(base_cords):
-                map.get(cord).terrain = 'base'
-                map.get(cord).owner = id
-                map.get(cord).num = 1
-
-        else:
-            # init blocks
-            map.blocks = [[None for col in range(map.dim[1])] for row in range(map.dim[0])]
-            for i, (row, col) in map.eprd:
-                map.blocks[row][col] = b.Block(
-                    (map.pos[0] + row * map.grid_size, map.pos[1] + col * map.grid_size), map.grid_size,
-                    owner=map_status['owner'][i], num=map_status['num'][i], terrain=map_status['terrain'][i])
+        # init blocks from info in map_status
+        map.blocks = [[
+            b.Block(
+                (map.pos[0] + row * map.grid_size, map.pos[1] + col * map.grid_size), map.grid_size,
+                owner=map_status[row][col]['owner'], num=map_status[row][col]['num'], terrain=map_status[row][col]['terrain'])
+            for col in range(map.dim[1])] for row in range(map.dim[0])]
 
         # init map variables (cities, players, visible)
         map.cities = map.get_blocks_by_prop('terrain', ['base', 'city'])
@@ -261,3 +245,24 @@ class MapLoader:
         map.pan = (
             map.total_size[0] // 2 - base[0] * map.grid_size - map.grid_size // 2,
             map.total_size[1] // 2 - base[1] * map.grid_size - map.grid_size // 2)
+
+    @classmethod
+    def generate_map_status(cls, dim, num_players):
+        # create empty blocks
+        map_status = [[{'terrain': 'blank', 'owner': None, 'num': 0}
+            for col in range(dim[1])] for row in range(dim[0])]
+
+        # create cities and bases
+        special_cords = choices(list(product(range(dim[0]), range(dim[1]))), k=100 + num_players)
+        mountain_cords, city_cords, base_cords = special_cords[:80], special_cords[80:100], special_cords[100:]
+        for x, y in mountain_cords:
+            map_status[x][y]['terrain'] = 'mountain'
+        for x, y in city_cords:
+            map_status[x][y]['terrain'] = 'city'
+            map_status[x][y]['num'] = randint(40, 50)
+        for id, (x, y) in enumerate(base_cords):
+            map_status[x][y]['terrain'] = 'base'
+            map_status[x][y]['owner'] = id
+            map_status[x][y]['num'] = 1
+
+        return map_status
