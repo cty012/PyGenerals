@@ -26,7 +26,7 @@ class Scene:
         else:
             self.game = g_c.Game(self.args, self.mode)
             self.game_menu = gm.GameMenu(self.args, self.args.get_pos(1, 1), (300, 240), align=(1, 1))
-            self.saver = None
+            self.saver = sv.Saver(self.args, '')
         self.ended = False
 
     def process_events(self, events):
