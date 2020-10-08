@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import socket
 from threading import Thread
@@ -12,6 +13,7 @@ from utils.parser import Parser
 class Game:
     def __init__(self, args, mode):
         self.args = args
+        self.name = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
         self.mode = mode
         # display
         player_colors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple'][:self.mode['num']]
@@ -21,7 +23,8 @@ class Game:
         self.command = cm.Command(self.args, self.players, self.mode['id'])
         self.player = h.Human(self.args, self.map)
         # connect
-        self.status = {'connected': [False if id == 0 else True for id in range(self.mode['num'])], 'running': True}
+        self.status = {
+            'connected': [False if id == 0 else True for id in range(self.mode['num'])], 'running': True, 'win': None}
         self.thread_recv = []
         for id in range(1, self.mode['num']):
             new_thread = Thread(target=self.receive(id), name=f'recv-{id}', daemon=True)
@@ -32,7 +35,8 @@ class Game:
     def process_events(self, events):
         # update map
         if self.map.clock.get_time() >= 0.5:
-            self.execute(self.map.update(self.command))
+            for command in self.map.update(self.command):
+                self.execute(command)
             for id in range(1, self.mode['num']):
                 self.send(json.dumps({
                     'tag': 'status', 'turn': self.map.turn, 'cc': self.command.get_lowest_cc(id),
@@ -56,6 +60,12 @@ class Game:
                 self.map.move_cursor(command[1], self.command)
         elif command[0] == 'conquer':
             self.sends(json.dumps({'tag': 'conquer', 'players': [command[1], command[2]]}))
+            alive = self.map.get_alive()
+            if len(alive) == 1:
+                if alive[0] == self.mode['id']:
+                    self.status['win'] = True
+                else:
+                    self.status['lose'] = False
         elif command[0] == 'close':
             if self.mode['num'] > 1:
                 for id in range(1, self.mode['num']):
@@ -114,6 +124,14 @@ class Game:
     def close(self):
         self.mode['socket'].close()
         self.status['running'] = False
+
+    def get_json(self):
+        return {
+            'name': self.name,
+            'num': self.mode['num'],
+            'turn': self.map.turn,
+            'record': self.map.record
+        }
 
     def show(self, ui):
         self.map.show(ui)

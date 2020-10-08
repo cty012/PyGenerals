@@ -16,7 +16,8 @@ class FrontEnd:
     def prepare(self):
         pygame.init()
         self.window = pygame.display.set_mode(self.args.real_size)
-        self.screen = pygame.Surface(self.args.size)
+        self.screen = pygame.Surface(self.args.size, flags=pygame.DOUBLEBUF)
+        self.screen.set_alpha(None)
         self.event = e.Event(self.args)
         self.ui = u.UI(self.window, self.screen)
         pygame.display.set_caption('Py-Generals')

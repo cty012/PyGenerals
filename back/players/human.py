@@ -1,6 +1,7 @@
 class Human:
     def __init__(self, args, map):
         self.args = args
+        self.type = 'human'
         self.map = map
 
     def process_events(self, events):

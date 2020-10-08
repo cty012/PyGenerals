@@ -71,7 +71,7 @@ class Block:
             ui.show_img_by_path(center, f'{final_terrain}.png', align=(1, 1), pan=pan)
 
         # number
-        if self.visible and self.num > 0:
+        if self.visible and not (self.owner is None and self.terrain != 'city' and self.num == 0):
             ui.show_text(
                 center, str(self.num), f.get_font('quicksand-bold', 15, 'otf'),
                 color=c.white, save='num', align=(1, 1), pan=pan)

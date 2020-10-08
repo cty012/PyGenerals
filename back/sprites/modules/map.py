@@ -29,12 +29,15 @@ class Map:
         MapLoader.init_blocks(self, map_status=map_status)
 
         # update
-        self.turn = 1
+        self.turn = 0
         self.update_interval = 0.5
         self.city_gen = 2
         self.blank_gen = 50
         self.clock = sw.Stopwatch()
         self.clock.start()
+
+        # record
+        self.record = []
 
         # refresh
         self.refresh()
@@ -72,6 +75,13 @@ class Map:
             return (row, col) if self.get((row, col)).in_range(pos, pan=self.pan) else None
         return None
 
+    def get_alive(self):
+        alive = []
+        for id in range(len(self.players)):
+            if self.get_base(id) is not None:
+                alive.append(id)
+        return alive
+
     def update(self, command):
         # reset clock
         self.clock.clear()
@@ -89,6 +99,7 @@ class Map:
                     self.get(cord).num += 1
 
         # execute commands
+        new_record = [None for _ in range(len(self.players))]
         for id in range(len(self.players)):
             com_list = command.command_lists[id]
             while len(com_list) > 0:
@@ -100,12 +111,14 @@ class Map:
                     continue
                 # execute command
                 player_updates = block.move(target)
+                new_record[id] = [com[0], com[1]]
                 # calc effect of command
                 for p_update in player_updates:
                     if p_update[0] == 'conquer':
                         self.conquer(p_update[1], p_update[2])
-                        return ['conquer', p_update[1], p_update[2]]
+                        yield ['conquer', p_update[1], p_update[2]]
                 break
+        self.record.append(new_record)
 
         # refresh
         self.refresh()
