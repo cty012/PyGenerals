@@ -83,6 +83,10 @@ class Map:
                 alive.append(id)
         return alive
 
+    def get_winner(self):
+        alive = self.get_alive()
+        return alive[0] if len(alive) == 1 else None
+
     def update(self, command):
         # reset clock
         self.clock.clear()

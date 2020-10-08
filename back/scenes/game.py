@@ -34,7 +34,7 @@ class Scene:
         if not self.game.status['running']:
             return self.execute(['quit'])
         # detect end:
-        if not self.ended and self.game.status['win'] is not None:
+        if not self.ended and self.game.status['winner'] is not None:
             self.ended = True
             self.execute(['pause'])
         # process save
@@ -73,7 +73,7 @@ class Scene:
         self.game.show(ui)
         # show game menu
         if self.game_menu.active:
-            self.game_menu.show(ui, win=self.game.status['win'])
+            self.game_menu.show(ui, win=self.game.status['winner'] == self.mode['id'])
         # show game saver
         if self.saver.active:
             self.saver.show(ui)

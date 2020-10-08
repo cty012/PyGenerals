@@ -13,7 +13,8 @@ from utils.parser import Parser
 class Game:
     def __init__(self, args, mode, init_status=None):
         self.args = args
-        self.name = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
+        self.date = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
+        self.name = self.date
         self.mode = mode
         # display
         player_colors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple'][:self.mode['num']]
@@ -25,7 +26,7 @@ class Game:
         self.player = h.Human(self.args, self.map)
         # connect
         self.status = {
-            'connected': [False if id == 0 else True for id in range(self.mode['num'])], 'running': True, 'win': None}
+            'connected': [False if id == 0 else True for id in range(self.mode['num'])], 'running': True, 'winner': None}
         self.thread_recv = []
         for id in range(1, self.mode['num']):
             new_thread = Thread(target=self.receive(id), name=f'recv-{id}', daemon=True)
@@ -61,12 +62,7 @@ class Game:
                 self.map.move_cursor(command[1], self.command)
         elif command[0] == 'conquer':
             self.sends(json.dumps({'tag': 'conquer', 'players': [command[1], command[2]]}))
-            alive = self.map.get_alive()
-            if len(alive) == 1:
-                if alive[0] == self.mode['id']:
-                    self.status['win'] = True
-                else:
-                    self.status['win'] = False
+            self.status['winner'] = self.map.get_winner()
         elif command[0] == 'close':
             if self.mode['num'] > 1:
                 for id in range(1, self.mode['num']):
@@ -128,9 +124,10 @@ class Game:
 
     def get_json(self):
         return {
-            'name': self.name,
+            'date': self.date,
             'num': self.mode['num'],
             'turn': self.map.turn,
+            'winner': self.status['winner'],
             'init-status': self.map.init_status,
             'record': self.map.record
         }

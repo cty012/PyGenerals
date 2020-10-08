@@ -70,8 +70,9 @@ class Saver:
         return content
 
     def shift(self, key, mods):
-        if mods & 64 != 0 or mods & 128 != 0:
-            return '_' if key == '-' else key.capitalize()
+        if mods & 1 != 0 or mods & 2 != 0:
+            if key == '-':
+                return '_'
         return key
 
     def show(self, ui):

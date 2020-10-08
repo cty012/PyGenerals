@@ -21,7 +21,7 @@ class Game:
         self.command = cm.Command(self.args, self.players, self.mode['id'])
         self.map_status = None
         # connect
-        self.status = {'connected': True, 'running': True, 'win': None}
+        self.status = {'connected': True, 'running': True, 'winner': None}
         self.thread_recv = Thread(target=self.receive, name='recv', daemon=True)
         self.thread_recv.start()
         # map
@@ -90,12 +90,7 @@ class Game:
                     self.map_status = msg['status']
                 elif msg['tag'] == 'conquer':
                     self.map.conquer(msg['players'][0], msg['players'][1])
-                    alive = self.map.get_alive()
-                    if len(alive) == 1:
-                        if alive[0] == self.mode['id']:
-                            self.status['win'] = True
-                        else:
-                            self.status['win'] = False
+                    self.status['winner'] = self.map.get_winner()
         print(f'CLIENT END receiving FROM SERVER...')
 
     def close(self):
