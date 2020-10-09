@@ -205,11 +205,12 @@ class Map:
             for field in fields
         }
 
-    def set_status(self, status):
+    def set_status(self, status, refresh=True):
         for field in status.keys():
             for i, cord in self.eprd:
                 self.get(cord).set_prop(field, status[field][i])
-        self.refresh()
+        if refresh:
+            self.refresh()
 
     def show_grid(self, ui, *, pan=(0, 0)):
         # vertical lines

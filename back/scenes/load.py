@@ -134,8 +134,8 @@ class SavedFile:
         else:
             color = self.player_colors[self.winner]
         color_blocks = (182, 192, 189)
-        ui.show_div(pos, (15, self.size[1]), color=color, pan=pan)
-        ui.show_div((pos[0] + 15, pos[1]), (self.size[0] - 315, self.size[1]), color=color_blocks, pan=pan)
+        ui.show_div((pos[0], pos[1]), (self.size[0] - 300, self.size[1]), color=color_blocks, pan=pan)
+        ui.show_div((pos[0] + 5, pos[1] + 5), (12, self.size[1] - 10), color=color, pan=pan)
         ui.show_div((pos[0] + self.size[0] - 300, pos[1]), (180, self.size[1]), color=cl.add(color_blocks, -10), pan=pan)
         ui.show_div(
             (pos[0] + self.size[0] - 120, pos[1]), (120, self.size[1] // 2), color=cl.add(color_blocks, -20), pan=pan)

@@ -133,7 +133,7 @@ class Game:
         return {
             'date': self.date,
             'num': self.mode['num'],
-            'turn': self.map.turn,
+            'turn': self.map.turn - 1,
             'winner': self.status['winner'],
             'status': self.status_record,
             'init-status': self.map.init_status,

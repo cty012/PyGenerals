@@ -1,3 +1,5 @@
+import itertools as it
+
 import utils.colors as c
 
 
@@ -35,9 +37,13 @@ class Command:
         while len(com_list) > 0 and com_list[0][2] < command_code:
             com_list.pop(0)
 
-    def show(self, ui, map, *, pan=(0, 0)):
+    def show(self, ui, map, *, ids=None, pan=(0, 0)):
+        ids = [self.id] if ids is None else ids
         coms = [set() for _ in range(4)]
-        for com in self.get_own_com_list():
+        for com in it.chain.from_iterable([self.command_lists[id] for id in ids]):
+            if com is None:
+                continue
+            com = tuple(com[0]), tuple(com[1])
             adjacent = map.get_adj_cords(com[0], corner=False, trim=False)
             if com[1] in adjacent:
                 coms[adjacent.index(com[1])].add(com[0])

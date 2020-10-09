@@ -19,8 +19,7 @@ class Scene:
         if 'escape' in events['key-down']:
             return self.execute(['pause'])
         # process game
-        self.game.process_events(events)
-        return [None]
+        return self.execute(self.game.process_events(events))
 
     def execute(self, command):
         if command[0] == 'pause':
