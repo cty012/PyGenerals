@@ -62,6 +62,7 @@ class Scene:
     def show(self, ui):
         # background
         self.background.show(ui)
+        ui.show_div((100, 0), (self.args.size[0] - 200, self.args.size[1]), color=(60, 110, 75))
         # saves
         for i, saved_file in enumerate(self.saves):
             saved_file.show(
@@ -129,19 +130,30 @@ class SavedFile:
         if self.err:
             color = cl.gray_1
         elif self.winner is None:
-            color = cl.gray_0
+            color = cl.white
         else:
             color = self.player_colors[self.winner]
+        color_blocks = (182, 192, 189)
         ui.show_div(pos, (15, self.size[1]), color=color, pan=pan)
-        ui.show_div((pos[0] + 15, pos[1]), (self.size[0] - 15, self.size[1]), color=cl.gray_1, pan=pan)
+        ui.show_div((pos[0] + 15, pos[1]), (self.size[0] - 315, self.size[1]), color=color_blocks, pan=pan)
+        ui.show_div((pos[0] + self.size[0] - 300, pos[1]), (180, self.size[1]), color=cl.add(color_blocks, -10), pan=pan)
+        ui.show_div(
+            (pos[0] + self.size[0] - 120, pos[1]), (120, self.size[1] // 2), color=cl.add(color_blocks, -20), pan=pan)
+        ui.show_div(
+            (pos[0] + self.size[0] - 120, pos[1] + self.size[1] // 2),
+            (120, self.size[1] // 2), color=(160, 145, 145), pan=pan)
 
         # show grid
-        ui.show_div(pos, self.size, border=2, pan=pan)
-        ui.show_line((pos[0] + self.size[0] - 300, pos[1]), (pos[0] + self.size[0] - 300, pos[1] + self.size[1]), pan=pan)
-        ui.show_line((pos[0] + self.size[0] - 120, pos[1]), (pos[0] + self.size[0] - 120, pos[1] + self.size[1]), pan=pan)
-        ui.show_line(
-            (pos[0] + self.size[0] - 120, pos[1] + self.size[1] // 2),
-            (pos[0] + self.size[0], pos[1] + self.size[1] // 2), pan=pan)
+        # ui.show_div(pos, self.size, border=2, pan=pan)
+        # ui.show_line(
+        #     (pos[0] + self.size[0] - 300, pos[1]),
+        #     (pos[0] + self.size[0] - 300, pos[1] + self.size[1]), width=4, color=(40, 80, 60), pan=pan)
+        # ui.show_line(
+        #     (pos[0] + self.size[0] - 120, pos[1]),
+        #     (pos[0] + self.size[0] - 120, pos[1] + self.size[1]), width=4, color=(40, 80, 60), pan=pan)
+        # ui.show_line(
+        #     (pos[0] + self.size[0] - 120, pos[1] + self.size[1] // 2),
+        #     (pos[0] + self.size[0], pos[1] + self.size[1] // 2), width=4, color=(40, 80, 60), pan=pan)
 
         # show name, num, & turn
         ui.show_text(
