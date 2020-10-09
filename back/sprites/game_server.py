@@ -49,7 +49,7 @@ class Game:
             for id in range(1, self.mode['num']):
                 self.send(json.dumps({
                     'tag': 'status', 'turn': self.map.turn, 'cc': self.command.get_lowest_cc(id),
-                    'status': status.fromkeys(('owner', 'num'))}), id)
+                    'status': {field: status[field] for field in ('owner', 'num')}}), id)
         # process map moves
         map_commands = self.player.process_events(events)
         if map_commands['clear']:
