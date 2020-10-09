@@ -21,7 +21,10 @@ class Block:
         return eval(f'self.{prop}')
 
     def set_prop(self, prop, value):
-        exec(f'self.{prop} = {value}')
+        if type(value) == str:
+            exec(f'self.{prop} = \'{value}\'')
+        else:
+            exec(f'self.{prop} = {value}')
 
     def fit(self):
         self.num = min(self.num, 9999)

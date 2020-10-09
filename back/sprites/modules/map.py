@@ -129,32 +129,42 @@ class Map:
         self.refresh()
         return [None]
 
-    def refresh(self):
-        # refresh visible, player num, and commands
+    def refresh(self, items=('visible', 'player')):
+        # refresh visible, player num
         # reset
-        for player in self.players:
-            player['land'] = 0
-            player['army'] = 0
-        for row, col in self.prd:
-            self.get((row, col)).visible = False
+        if 'player' in items:
+            for player in self.players:
+                player['land'] = 0
+                player['army'] = 0
+        if 'visible' in items:
+            for row, col in self.prd:
+                self.get((row, col)).visible = False
 
         # check
         for row, col in self.prd:
             block = self.get((row, col))
-            if block.owner is not None:
-                self.players[block.owner]['land'] += 1
-                self.players[block.owner]['army'] += block.num
-            if block.owner == self.id:
-                self.get((row, col)).visible = True
-                for adj_cord in self.get_adj_cords((row, col)):
-                    self.get(adj_cord).visible = True
+            if 'player' in items:
+                if block.owner is not None:
+                    self.players[block.owner]['land'] += 1
+                    self.players[block.owner]['army'] += block.num
+            if 'visible' in items:
+                if block.owner == self.id:
+                    self.get((row, col)).visible = True
+                    for adj_cord in self.get_adj_cords((row, col)):
+                        self.get(adj_cord).visible = True
 
-    def move_cursor(self, direction, command):
+    def move_cursor(self, direction, command, execute=True):
         if self.cursor is None:
             return
 
-        command_list = command.get_own_com_list()
         target = (self.cursor[0] + direction[0], self.cursor[1] + direction[1])
+
+        if not execute:
+            if self.cord_in_range(target):
+                self.cursor = target
+            return
+
+        command_list = command.get_own_com_list()
 
         def controllable(cord, id):
             return self.get(cord).owner == id or (len(command_list) > 0 and cord == command_list[-1][1])
@@ -196,6 +206,7 @@ class Map:
         }
 
     def set_status(self, status):
+        print(status)
         for field in status.keys():
             for i, cord in self.eprd:
                 self.get(cord).set_prop(field, status[field][i])

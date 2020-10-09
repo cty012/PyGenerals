@@ -88,6 +88,7 @@ class SavedFile:
         self.num = 0
         self.turn = 0
         self.winner = None
+        self.status = None
         self.init_status = None
         self.err = False
         try:
@@ -96,6 +97,7 @@ class SavedFile:
             self.num = self.replay['num']
             self.turn = self.replay['turn']
             self.winner = self.replay['winner']
+            self.status = self.replay['status']
             self.init_status = self.replay['init-status']
         except:
             print(f'ERROR loading saved file: {self.name}.gnr')
@@ -114,7 +116,8 @@ class SavedFile:
             pos[1] + self.size[1] // 2,
             pos[1] + self.size[1])
         if x0 < mouse_pos[0] < x1 and y0 < mouse_pos[1] < y1:
-            return ['replay', self.replay]
+            if not self.err:
+                return ['replay', self.replay]
         elif x0 < mouse_pos[0] < x1 and y1 < mouse_pos[1] < y2:
             return ['delete', self.name]
         return [None]
@@ -144,13 +147,14 @@ class SavedFile:
         ui.show_text(
             (pos[0] + 40, pos[1] + self.size[1] // 2), self.name,
             f.cambria(22), save='load-name', align=(0, 1), pan=pan)
-        ui.show_text(
-            (pos[0] + self.size[0] - 210, pos[1] + self.size[1] // 2 - 18), f'Turn {self.turn}',
-            f.cambria(20), save='load-info', align=(1, 1), pan=pan)
-        ui.show_text(
-            (pos[0] + self.size[0] - 210, pos[1] + self.size[1] // 2 + 18),
-            f'{self.num} player' + ('' if self.num == 1 else 's'),
-            f.cambria(20), save='load-info', align=(1, 1), pan=pan)
+        if not self.err:
+            ui.show_text(
+                (pos[0] + self.size[0] - 210, pos[1] + self.size[1] // 2 - 18), f'Turn {self.turn}',
+                f.cambria(20), save='load-info', align=(1, 1), pan=pan)
+            ui.show_text(
+                (pos[0] + self.size[0] - 210, pos[1] + self.size[1] // 2 + 18),
+                f'{self.num} player' + ('' if self.num == 1 else 's'),
+                f.cambria(20), save='load-info', align=(1, 1), pan=pan)
 
         # show play and delete images
         ui.show_img_by_path(

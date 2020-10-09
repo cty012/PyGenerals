@@ -24,6 +24,8 @@ class Game:
             self.args, self.args.get_pos(1, 1), self.players, self.mode['id'], map_status=init_status, align=(1, 1))
         self.command = cm.Command(self.args, self.players, self.mode['id'])
         self.player = h.Human(self.args, self.map)
+        # record
+        self.status_record = []
         # connect
         self.status = {
             'connected': [False if id == 0 else True for id in range(self.mode['num'])], 'running': True, 'winner': None}
@@ -37,12 +39,17 @@ class Game:
     def process_events(self, events):
         # update map
         if self.map.clock.get_time() >= 0.5:
+            # update map
             for command in self.map.update(self.command):
                 self.execute(command)
+            # record status
+            status = self.map.get_status(('owner', 'num', 'terrain'))
+            self.status_record.append(status)
+            # send status
             for id in range(1, self.mode['num']):
                 self.send(json.dumps({
                     'tag': 'status', 'turn': self.map.turn, 'cc': self.command.get_lowest_cc(id),
-                    'status': self.map.get_status()}), id)
+                    'status': status.fromkeys(('owner', 'num'))}), id)
         # process map moves
         map_commands = self.player.process_events(events)
         if map_commands['clear']:
@@ -128,6 +135,7 @@ class Game:
             'num': self.mode['num'],
             'turn': self.map.turn,
             'winner': self.status['winner'],
+            'status': self.status_record,
             'init-status': self.map.init_status,
             'record': self.map.record
         }

@@ -25,6 +25,8 @@ class BackEnd:
             self.scene = s.room_client.Scene(self.args, command[1], command[2])
         elif command[0] == 'game':
             self.scene = s.game.Scene(self.args, command[1])
+        elif command[0] == 'replay':
+            self.scene = s.replay.Scene(self.args, command[1])
         else:
             return command[0]
 
