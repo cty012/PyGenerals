@@ -31,7 +31,14 @@ class TurnDisplayer:
             if self.buttons[name].in_range(mouse_pos):
                 target_turn = eval(f'{self.map.turn} {name[4:]} 1')
                 if self.min_turn <= target_turn <= self.max_turn:
-                    return [name[:4], target_turn]
+                    return ['turn', target_turn]
+        return [None]
+
+    def process_right_click(self, mouse_pos):
+        for name in self.buttons:
+            if self.buttons[name].in_range(mouse_pos):
+                target_turn = utils.min_max(eval(f'{self.map.turn} {name[4:]} 10'), self.min_turn, self.max_turn)
+                return ['turn', target_turn]
         return [None]
 
     def show(self, ui, *, pan=(0, 0)):

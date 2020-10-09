@@ -38,6 +38,10 @@ class Game:
             # process turn displayer
             elif self.turn_displayer.in_range(events['mouse-pos']):
                 return self.execute(self.turn_displayer.process_click(events['mouse-pos']))
+        elif events['mouse-right'] == 'down':
+            # process turn displayer
+            if self.turn_displayer.in_range(events['mouse-pos']):
+                return self.execute(self.turn_displayer.process_right_click(events['mouse-pos']))
         # process map moves
         map_commands = self.player.process_events(events)
         self.execute(['move-board', map_commands['move-board']])
@@ -73,6 +77,7 @@ class Game:
             else:
                 self.command.command_lists = [[item] for item in self.replay['record'][self.map.turn + 1]]
             self.map.set_status(self.replay['status'][self.map.turn], refresh=False)
+            self.map.refresh(('player',))
             # update command
         elif command[0] == 'move-board':
             self.map.move_board(command[1])

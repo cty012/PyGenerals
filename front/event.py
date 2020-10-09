@@ -16,6 +16,8 @@ class Event:
         all_events = {
             'quit': False,
             'mouse-left': 'hover',
+            'mouse-middle': 'hover',
+            'mouse-right': 'hover',
             'mouse-wheel': 'static',
             'mouse-pos': (pos[0] / self.args.scale, pos[1] / self.args.scale),
             'key-down': [],
@@ -33,6 +35,10 @@ class Event:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     all_events['mouse-left'] = 'down'
+                elif event.button == 2:
+                    all_events['mouse-middle'] = 'down'
+                elif event.button == 3:
+                    all_events['mouse-right'] = 'down'
                 elif event.button == 4:
                     all_events['mouse-wheel'] = 'up'
                 elif event.button == 5:
