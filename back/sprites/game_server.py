@@ -7,6 +7,7 @@ import back.players.human as h
 import back.sprites.modules.command as cm
 import back.sprites.modules.map as m
 import back.sprites.modules.scoreboard as sb
+import back.sprites.modules.turn_displayer as td
 from utils.parser import Parser
 
 
@@ -24,8 +25,9 @@ class Game:
             self.args, self.args.get_pos(1, 1), self.players, self.mode['id'], map_status=init_status, align=(1, 1))
         self.command = cm.Command(self.args, self.players, self.mode['id'])
         self.player = h.Human(self.args, self.map)
+        self.turn_displayer = td.TurnDisplayer(self.args, (10, 10), self.map, align=(0, 0))
         # record
-        self.status_record = []
+        self.status_record = [self.map.get_status(('owner', 'num', 'terrain'))]
         # connect
         self.status = {
             'connected': [False if id == 0 else True for id in range(self.mode['num'])], 'running': True, 'winner': None}
@@ -133,7 +135,7 @@ class Game:
         return {
             'date': self.date,
             'num': self.mode['num'],
-            'turn': self.map.turn - 1,
+            'turn': self.map.turn,
             'winner': self.status['winner'],
             'status': self.status_record,
             'init-status': self.map.init_status,
@@ -144,3 +146,4 @@ class Game:
         self.map.show(ui)
         self.command.show(ui, self.map)
         self.scoreboard.show(ui)
+        self.turn_displayer.show(ui)

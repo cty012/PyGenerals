@@ -31,11 +31,11 @@ class Scene:
         self.buttons = {
             'connect': c.Button(
                 (self.args.size[0] // 2, 540), (400, 60), 'connect',
-                font=f.tnr(22), align=(1, 1), background=(210, 210, 210)
+                font=f.tnr(22), save='tnr-22', align=(1, 1), background=(210, 210, 210)
             ),
             'back': c.Button(
                 (self.args.size[0] // 2, 640), (400, 60), 'back',
-                font=f.tnr(22), align=(1, 1), background=(210, 210, 210)
+                font=f.tnr(22), save='tnr-22', align=(1, 1), background=(210, 210, 210)
             ),
         }
 
@@ -106,9 +106,13 @@ class Scene:
         # show input box
         ui.show_div((self.args.size[0] // 2, 300), (600, 80), color=(255, 255, 255), align=(1, 1))
         ui.show_div((self.args.size[0] // 2, 300), (600, 80), border=2, color=(0, 0, 0), align=(1, 1))
-        ui.show_text((self.args.size[0] // 2, 300), self.server_ip, f.cambria(25), align=(1, 1))
+        if self.server_ip != '':
+            ui.show_text((self.args.size[0] // 2, 300), self.server_ip, f.cambria(25), save='cambria-25', align=(1, 1))
         # show buttons
         for name in self.buttons:
             self.buttons[name].show(ui)
         # show error message
-        ui.show_text((self.args.size[0] // 2, 400), self.error_msg, f.tnr(20), color=(128, 0, 0), align=(1, 1))
+        if self.error_msg is not None:
+            ui.show_text(
+                (self.args.size[0] // 2, 400), self.error_msg, f.tnr(20),
+                color=(128, 0, 0), save='tnr-20-err', align=(1, 1))

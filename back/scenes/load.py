@@ -26,7 +26,7 @@ class Scene:
         self.saves.sort(key=lambda sf: [not sf.err, re.split(r'[\-_]', sf.date), sf.name], reverse=True)
         self.button = c.Button(
             (self.args.size[0] // 2, self.args.size[1] - self.bar_height // 2), (200, 50),
-            'back', font=f.tnr(22), align=(1, 1), background=(210, 210, 210))
+            'back', font=f.tnr(22), save='tnr-22', align=(1, 1), background=(210, 210, 210))
 
     def process_events(self, events):
         total_height = len(self.saves) * (self.padding + 120) - self.padding + 2 * self.margin
@@ -158,15 +158,15 @@ class SavedFile:
         # show name, num, & turn
         ui.show_text(
             (pos[0] + 40, pos[1] + self.size[1] // 2), self.name,
-            f.cambria(22), save='load-name', align=(0, 1), pan=pan)
+            f.cambria(22), save='cambria-22', align=(0, 1), pan=pan)
         if not self.err:
             ui.show_text(
                 (pos[0] + self.size[0] - 210, pos[1] + self.size[1] // 2 - 18), f'Turn {self.turn}',
-                f.cambria(20), save='load-info', align=(1, 1), pan=pan)
+                f.cambria(20), save='cambria-20', align=(1, 1), pan=pan)
             ui.show_text(
                 (pos[0] + self.size[0] - 210, pos[1] + self.size[1] // 2 + 18),
                 f'{self.num} player' + ('' if self.num == 1 else 's'),
-                f.cambria(20), save='load-info', align=(1, 1), pan=pan)
+                f.cambria(20), save='cambria-20', align=(1, 1), pan=pan)
 
         # show play and delete images
         ui.show_img_by_path(

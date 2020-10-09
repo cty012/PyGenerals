@@ -31,11 +31,11 @@ class Scene:
         self.buttons = {
             'play': c.Button(
                 (self.args.size[0] // 2 - 300, 600), (300, 60), 'start game',
-                font=f.tnr(23), align=(1, 1), background=(210, 210, 210)
+                font=f.tnr(23), save='tnr-23', align=(1, 1), background=(210, 210, 210)
             ),
             'back': c.Button(
                 (self.args.size[0] // 2 + 300, 600), (300, 60), 'close room',
-                font=f.tnr(23), align=(1, 1), background=(210, 210, 210)
+                font=f.tnr(23), save='tnr-23', align=(1, 1), background=(210, 210, 210)
             ),
         }
 

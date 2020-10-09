@@ -44,6 +44,7 @@ class UI:
 
     def show_text(self, pos, text, font, *, color=(0, 0, 0), background=None, save=None, align=(0, 0), pan=(0, 0)):
         if save is None:
+            print(f'!!! {text}')
             pos = (pos[0] + pan[0], pos[1] + pan[1])
             text_img = self.font.render_font(font).render(text, True, color, background)
             size = text_img.get_size()

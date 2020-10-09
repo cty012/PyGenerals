@@ -12,15 +12,15 @@ class Scene:
         self.buttons = {
             'sing': c.Button(
                 (self.args.size[0] // 2, 360), (600, 80), 'Single Player',
-                font=f.tnr(25), align=(1, 1), background=(210, 210, 210)
+                font=f.tnr(25), save='tnr-25', align=(1, 1), background=(210, 210, 210)
             ),
             'mult': c.Button(
                 (self.args.size[0] // 2, 460), (600, 80), 'Multi-Player',
-                font=f.tnr(25), align=(1, 1), background=(210, 210, 210)
+                font=f.tnr(25), save='tnr-25', align=(1, 1), background=(210, 210, 210)
             ),
             'back': c.Button(
                 (self.args.size[0] // 2, 560), (600, 80), 'Back',
-                font=f.tnr(25), align=(1, 1), background=(210, 210, 210)
+                font=f.tnr(25), save='tnr-25', align=(1, 1), background=(210, 210, 210)
             ),
         }
 
@@ -47,6 +47,6 @@ class Scene:
 
     def show(self, ui):
         self.background.show(ui)
-        ui.show_text((self.args.size[0] // 2, 150), "Game Mode", font=f.cambria(60), align=(1, 1))
+        ui.show_text((self.args.size[0] // 2, 150), "Game Mode", font=f.cambria(60), save='cambria-60', align=(1, 1))
         for name in self.buttons:
             self.buttons[name].show(ui)

@@ -73,7 +73,11 @@ class Scene:
         self.game.show(ui)
         # show game menu
         if self.game_menu.active:
-            self.game_menu.show(ui, win=self.game.status['winner'] == self.mode['id'])
+            if self.game.status['winner'] is None:
+                win = None
+            else:
+                win = self.game.status['winner'] == self.mode['id']
+            self.game_menu.show(ui, win=win)
         # show game saver
         if self.saver.active:
             self.saver.show(ui)

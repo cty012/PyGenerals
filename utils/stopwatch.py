@@ -46,6 +46,7 @@ class Stopwatch:
             return self.speed * (self.end_time - self.start_time) + self.interval
         elif self.start_time is not None and self.end_time is None:
             return self.speed * (time.time() - self.start_time) + self.interval
+        return 0
 
     def get_str_time(self):
         millis = self.get_time()

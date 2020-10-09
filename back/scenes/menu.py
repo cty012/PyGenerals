@@ -9,16 +9,16 @@ class Scene:
         self.buttons = {
             'new': c.Button(
                 (self.args.size[0] // 2, 310), (600, 80), 'New Game',
-                font=f.tnr(25), align=(1, 1), background=(210, 210, 210)),
+                font=f.tnr(25), save='tnr-25', align=(1, 1), background=(210, 210, 210)),
             'join': c.Button(
                 (self.args.size[0] // 2, 410), (600, 80), 'Join Game',
-                font=f.tnr(25), align=(1, 1), background=(210, 210, 210)),
+                font=f.tnr(25), save='tnr-25', align=(1, 1), background=(210, 210, 210)),
             'replay': c.Button(
                 (self.args.size[0] // 2, 510), (600, 80), 'Replay',
-                font=f.tnr(25), align=(1, 1), background=(210, 210, 210)),
+                font=f.tnr(25), save='tnr-25', align=(1, 1), background=(210, 210, 210)),
             'quit': c.Button(
                 (self.args.size[0] // 2, 610), (600, 80), 'Exit',
-                font=f.tnr(25), align=(1, 1), background=(210, 210, 210)),
+                font=f.tnr(25), save='tnr-25', align=(1, 1), background=(210, 210, 210)),
         }
 
     def process_events(self, events):

@@ -3,6 +3,7 @@ import back.sprites.modules.command as cm
 import back.sprites.modules.map as m
 import back.sprites.menus.replay_menu as rm
 import back.sprites.modules.scoreboard as sb
+import back.sprites.modules.turn_displayer as td
 
 
 class Game:
@@ -20,6 +21,7 @@ class Game:
         self.map.set_status({'visible': [True for _ in range(self.map.dim[0] * self.map.dim[1])]}, refresh=False)
         self.command = cm.Command(self.args, self.players, 0)
         self.player = h.Human(self.args, self.map)
+        self.turn_displayer = td.TurnDisplayer(self.args, (10, 10), self.map, arrows=True, max_turn=self.replay['turn'])
         # status
         self.status = {'running': True}
         self.threshold = 0.5
@@ -29,10 +31,13 @@ class Game:
         # update map
         if self.map.clock.get_time() >= self.threshold:
             self.execute(['turn', self.map.turn + 1])
-        # process replay speed
         if events['mouse-left'] == 'down':
+            # process replay speed
             if self.replay_menu.in_range(events['mouse-pos']):
                 return self.execute(self.replay_menu.process_click(events['mouse-pos']))
+            # process turn displayer
+            elif self.turn_displayer.in_range(events['mouse-pos']):
+                return self.execute(self.turn_displayer.process_click(events['mouse-pos']))
         # process map moves
         map_commands = self.player.process_events(events)
         self.execute(['move-board', map_commands['move-board']])
@@ -80,4 +85,5 @@ class Game:
         self.map.show(ui)
         self.command.show(ui, self.map, ids=range(self.replay['num']))
         self.scoreboard.show(ui)
+        self.turn_displayer.show(ui)
         self.replay_menu.show(ui)

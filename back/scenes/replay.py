@@ -16,7 +16,7 @@ class Scene:
         if not self.game.status['running']:
             return self.execute(['quit'])
         # process self
-        if 'escape' in events['key-down']:
+        if 'space' in events['key-down']:
             return self.execute(['pause'])
         # process game
         return self.execute(self.game.process_events(events))

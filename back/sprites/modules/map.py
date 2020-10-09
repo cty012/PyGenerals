@@ -38,7 +38,7 @@ class Map:
         self.clock.start()
 
         # record
-        self.record = []
+        self.record = [[None for _ in self.players]]
 
         # refresh
         self.refresh()

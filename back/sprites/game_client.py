@@ -7,6 +7,7 @@ import back.players.human as h
 import back.sprites.modules.command as cm
 import back.sprites.modules.map as m
 import back.sprites.modules.scoreboard as sb
+import back.sprites.modules.turn_displayer as td
 from utils.parser import Parser
 
 
@@ -29,6 +30,7 @@ class Game:
             time.sleep(0.01)
         self.map = m.Map(self.args, self.args.get_pos(1, 1), self.players, self.mode['id'], map_status=self.map_status, align=(1, 1))
         self.player = h.Human(self.args, self.map)
+        self.turn_displayer = td.TurnDisplayer(self.args, (10, 10), self.map, align=(0, 0))
 
     def process_events(self, events):
         # process map
@@ -103,3 +105,4 @@ class Game:
         self.map.show(ui)
         self.command.show(ui, self.map)
         self.scoreboard.show(ui)
+        self.turn_displayer.show(ui)

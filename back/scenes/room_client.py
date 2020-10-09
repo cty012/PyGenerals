@@ -27,7 +27,7 @@ class Scene:
         self.buttons = {
             'back': c.Button(
                 (self.args.size[0] // 2, 640), (600, 80), 'exit room',
-                font=f.tnr(25), align=(1, 1), background=(210, 210, 210)
+                font=f.tnr(25), save='tnr-25', align=(1, 1), background=(210, 210, 210)
             ),
         }
 
