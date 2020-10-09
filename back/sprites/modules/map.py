@@ -206,7 +206,6 @@ class Map:
         }
 
     def set_status(self, status):
-        print(status)
         for field in status.keys():
             for i, cord in self.eprd:
                 self.get(cord).set_prop(field, status[field][i])
