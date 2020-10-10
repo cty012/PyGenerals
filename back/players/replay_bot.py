@@ -4,13 +4,13 @@ import utils.functions as utils
 class ReplayBot:
     def __init__(self, args, map, max_turn):
         self.args = args
-        self.type = 'human'
+        self.type = 'replay-bot'
         self.map = map
         self.min_turn = 0
         self.max_turn = max_turn
 
     def process_events(self, events):
-        commands = {'move-board': [0, 0], 'turn': self.map.turn, 'speed': 0}
+        commands = {'move-board': [0, 0], 'turn': self.map.turn, 'speed': 0, 'pause': False}
 
         # key events
         for key in events['key-pressed']:
@@ -35,6 +35,8 @@ class ReplayBot:
                 commands['speed'] -= 1
             elif key == '=':
                 commands['speed'] += 1
+            elif key == 'space':
+                commands['pause'] = True
         commands['turn'] = utils.min_max(commands['turn'], self.min_turn, self.max_turn)
         commands['speed'] = {0: None, -1: '-', 1: '+'}[commands['speed']]
 

@@ -6,11 +6,12 @@ import utils.functions as utils
 
 
 class UI:
-    def __init__(self, window, screen):
+    def __init__(self, args, window, screen):
+        self.args = args
         self.window = window
         self.screen = screen
-        self.font = f.Font()
-        self.image = i.Image()
+        self.font = f.Font(self.args)
+        self.image = i.Image(self.args)
 
     def clear(self):
         self.screen.fill((255, 255, 255))

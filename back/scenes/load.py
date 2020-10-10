@@ -20,9 +20,7 @@ class Scene:
         self.pan = 0
 
         # saves and buttons
-        if 'replay' not in os.listdir():
-            os.mkdir('replay')
-        self.saves = [SavedFile(file[:-4]) for file in os.listdir('replay') if file.endswith('.gnr')]
+        self.saves = [SavedFile(self.args, file[:-4]) for file in os.listdir(os.path.join(self.args.path, 'replay')) if file.endswith('.gnr')]
         self.saves.sort(key=lambda sf: [not sf.err, re.split(r'[\-_]', sf.date), sf.name], reverse=True)
         self.button = c.Button(
             (self.args.size[0] // 2, self.args.size[1] - self.bar_height // 2), (200, 50),
@@ -52,7 +50,7 @@ class Scene:
 
     def execute(self, command):
         if command[0] == 'delete':
-            os.remove(os.path.join('replay', f'{command[1]}.gnr'))
+            os.remove(os.path.join(self.args.path, 'replay', f'{command[1]}.gnr'))
             for i in range(len(self.saves)):
                 if self.saves[i].name == command[1]:
                     self.saves.pop(i)
@@ -77,8 +75,9 @@ class Scene:
 
 
 class SavedFile:
-    def __init__(self, name):
+    def __init__(self, args, name):
         # display
+        self.args = args
         self.name = name
         self.size = (800, 120)
         self.player_colors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple']
@@ -93,7 +92,7 @@ class SavedFile:
         self.init_status = None
         self.err = False
         try:
-            self.replay = sv.Saver.load(self.name)
+            self.replay = sv.Saver.load(os.path.join(self.args.path, 'replay', f'{self.name}.gnr'))
             self.date = self.replay['date']
             self.num = self.replay['num']
             self.turn = self.replay['turn']

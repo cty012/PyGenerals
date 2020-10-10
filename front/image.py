@@ -3,8 +3,9 @@ import pygame
 
 
 class Image:
-    def __init__(self, imgs=()):
-        self.root = os.path.join('.', 'src', 'imgs')
+    def __init__(self, args, imgs=()):
+        self.args = args
+        self.root = os.path.join(self.args.path, 'src', 'imgs')
         self.imgs = {name: self.load(name) for name in imgs}
 
     def load(self, path):

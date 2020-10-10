@@ -58,14 +58,12 @@ class Saver:
         return [None]
 
     def save(self, game_json):
-        if 'replay' not in os.listdir():
-            os.mkdir('replay')
-        with open(os.path.join('replay', f'{self.text}.gnr'), 'w') as file:
+        with open(os.path.join(self.args.path, 'replay', f'{self.text}.gnr'), 'w') as file:
             json.dump(game_json, file)
 
     @classmethod
-    def load(cls, name):
-        with open(os.path.join('replay', f'{name}.gnr'), 'r') as file:
+    def load(cls, path):
+        with open(path, 'r') as file:
             content = json.load(file)
         return content
 

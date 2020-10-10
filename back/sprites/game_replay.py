@@ -42,14 +42,17 @@ class Game:
             # process turn displayer
             if self.turn_displayer.in_range(events['mouse-pos']):
                 return self.execute(self.turn_displayer.process_right_click(events['mouse-pos']))
-        # process map moves
-        map_commands = self.player.process_events(events)
-        self.execute(['move-board', map_commands['move-board']])
-        if map_commands['turn'] != self.map.turn:
-            self.execute(['turn', map_commands['turn']])
-        if map_commands['speed'] is not None:
-            self.execute(['speed', map_commands['speed']])
-        # pass
+        # process player moves
+        player_commands = self.player.process_events(events)
+        self.execute(['move-board', player_commands['move-board']])
+        #
+        if player_commands['turn'] != self.map.turn:
+            self.execute(['turn', player_commands['turn']])
+        if player_commands['speed'] is not None:
+            self.execute(['speed', player_commands['speed']])
+        if player_commands['pause']:
+            command = self.replay_menu.buttons['pause'].text
+            self.execute(['pause' if command == 'play' else command])
         return [None]
 
     def execute(self, command):
@@ -61,10 +64,10 @@ class Game:
         elif command[0] == 'speed':
             current_speed = int(self.replay_menu.buttons[""].text[6:])
             if command[1] == '+' and current_speed < 8:
-                self.threshold = (self.threshold + self.map.clock.get_time()) / 2
+                self.threshold /= 2
                 self.replay_menu.buttons[''].text = f'speed×{current_speed * 2}'
             elif command[1] == '-' and current_speed > 1:
-                self.threshold = (self.threshold - self.map.clock.get_time() / 2) * 2
+                self.threshold *= 2
                 self.replay_menu.buttons[''].text = f'speed×{current_speed // 2}'
         elif command[0] == 'turn':
             if not 0 <= command[1] <= self.replay['turn']:

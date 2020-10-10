@@ -3,8 +3,9 @@ import pygame
 
 
 class Font:
-    def __init__(self):
-        self.root = os.path.join('.', 'src', 'fonts')
+    def __init__(self, args):
+        self.args = args
+        self.root = os.path.join(self.args.path, 'src', 'fonts')
         self.text_imgs = {}
 
     def render_font(self, font):

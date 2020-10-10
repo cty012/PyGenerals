@@ -15,16 +15,11 @@ class Scene:
         # detect quit
         if not self.game.status['running']:
             return self.execute(['quit'])
-        # process self
-        if 'space' in events['key-down']:
-            return self.execute(['pause'])
         # process game
         return self.execute(self.game.process_events(events))
 
     def execute(self, command):
-        if command[0] == 'pause':
-            self.game.execute(['pause'])
-        elif command[0] == 'quit':
+        if command[0] == 'quit':
             return ['menu']
         return [None]
 
