@@ -1,4 +1,4 @@
-import back.players.human as h
+import back.players.replay_bot as rb
 import back.sprites.modules.command as cm
 import back.sprites.modules.map as m
 import back.sprites.menus.replay_menu as rm
@@ -20,7 +20,7 @@ class Game:
             self.args, self.args.get_pos(1, 1), self.players, 0, map_status=self.replay['init-status'], align=(1, 1))
         self.map.set_status({'visible': [True for _ in range(self.map.dim[0] * self.map.dim[1])]}, refresh=False)
         self.command = cm.Command(self.args, self.players, 0)
-        self.player = h.Human(self.args, self.map)
+        self.player = rb.ReplayBot(self.args, self.map, self.replay['turn'])
         self.turn_displayer = td.TurnDisplayer(self.args, (10, 10), self.map, arrows=True, max_turn=self.replay['turn'])
         # status
         self.status = {'running': True}
@@ -45,7 +45,10 @@ class Game:
         # process map moves
         map_commands = self.player.process_events(events)
         self.execute(['move-board', map_commands['move-board']])
-        self.execute(['move-cursor', map_commands['move-cursor']])
+        if map_commands['turn'] != self.map.turn:
+            self.execute(['turn', map_commands['turn']])
+        if map_commands['speed'] is not None:
+            self.execute(['speed', map_commands['speed']])
         # pass
         return [None]
 
