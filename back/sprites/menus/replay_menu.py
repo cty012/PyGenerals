@@ -34,14 +34,19 @@ class ReplayMenu:
         # buttons
         for name in self.buttons:
             if self.buttons[name].in_range(pos):
-                if name in ['pause', 'quit']:
+                if name == 'quit':
                     return [name]
+                elif name == 'pause':
+                    if self.buttons[name].text == 'replay':
+                        return ['replay']
+                    else:
+                        return ['pause']
                 else:
                     return [name[:5], name[5:]]
         return [None]
 
     def toggle_pause(self):
-        self.buttons['pause'].text = {'play': 'pause', 'pause': 'play'}[self.buttons['pause'].text]
+        self.buttons['pause'].text = {'play': 'pause', 'pause': 'play', 'replay': 'pause'}[self.buttons['pause'].text]
 
     def show(self, ui, *, pan=(0, 0)):
         pos = self.pos[0] + pan[0], self.pos[1] + pan[1]

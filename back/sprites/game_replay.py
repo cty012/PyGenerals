@@ -64,7 +64,8 @@ class Game:
                 self.threshold = (self.threshold - self.map.clock.get_time() / 2) * 2
                 self.replay_menu.buttons[''].text = f'speed×{current_speed // 2}'
         elif command[0] == 'turn':
-            # update map
+            if not 0 <= command[1] <= self.replay['turn']:
+                return
             if self.map.clock.is_running():
                 self.map.clock.clear()
                 self.map.clock.start()
@@ -73,12 +74,17 @@ class Game:
             self.map.turn = command[1]
             if self.replay['turn'] <= self.map.turn:
                 self.map.clock.stop()
+                self.replay_menu.buttons['pause'].text = 'replay'
                 self.command.clear_commands()
             else:
+                self.replay_menu.toggle_pause()
+                self.replay_menu.toggle_pause()
                 self.command.command_lists = [[item] for item in self.replay['record'][self.map.turn + 1]]
             self.map.set_status(self.replay['status'][self.map.turn], refresh=False)
             self.map.refresh(('player',))
-            # update command
+        elif command[0] == 'replay':
+            self.execute(['turn', 0])
+            self.execute(['pause'])
         elif command[0] == 'move-board':
             self.map.move_board(command[1])
         elif command[0] == 'move-cursor':
