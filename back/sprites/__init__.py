@@ -1,3 +1,4 @@
+import back.sprites.menus
 import back.sprites.modules
 
 import back.sprites.component
