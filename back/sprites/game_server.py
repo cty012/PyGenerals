@@ -8,7 +8,8 @@ import back.sprites.modules.command as cm
 import back.sprites.modules.map as m
 import back.sprites.modules.scoreboard as sb
 import back.sprites.modules.turn_displayer as td
-from utils.parser import Parser
+import utils.colors as cl
+
 
 
 class Game:
@@ -18,7 +19,7 @@ class Game:
         self.name = self.date
         self.mode = mode
         # display
-        player_colors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple'][:self.mode['num']]
+        player_colors = cl.get_player_colors()[:self.mode['num']]
         self.players = [{'land': 0, 'army': 0, 'color': player_colors[id]} for id in range(self.mode['num'])]
         self.scoreboard = sb.Scoreboard(self.args, (self.args.size[0] - 10, 10), self.players, align=(2, 0))
         self.map = m.Map(

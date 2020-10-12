@@ -80,7 +80,7 @@ class SavedFile:
         self.args = args
         self.name = name
         self.size = (800, 120)
-        self.player_colors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple']
+        self.player_colors = cl.get_player_colors()
 
         # game
         self.replay = None

@@ -4,6 +4,7 @@ import back.sprites.modules.map as m
 import back.sprites.menus.replay_menu as rm
 import back.sprites.modules.scoreboard as sb
 import back.sprites.modules.turn_displayer as td
+import utils.colors as cl
 
 
 class Game:
@@ -12,7 +13,7 @@ class Game:
         self.replay = replay
         self.name = ''
         # display
-        player_colors = ['red', 'blue', 'green', 'yellow', 'brown', 'purple'][:self.replay['num']]
+        player_colors = cl.get_player_colors()[:self.replay['num']]
         self.players = [{'land': 0, 'army': 0, 'color': player_colors[id]} for id in range(self.replay['num'])]
         self.scoreboard = sb.Scoreboard(self.args, (self.args.size[0] - 10, 10), self.players, align=(2, 0))
         self.replay_menu = rm.ReplayMenu((self.args.size[0] - 10, self.args.size[1] - 10), align=(2, 2))
