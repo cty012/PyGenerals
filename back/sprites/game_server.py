@@ -9,7 +9,7 @@ import back.sprites.modules.map as m
 import back.sprites.modules.scoreboard as sb
 import back.sprites.modules.turn_displayer as td
 import utils.colors as cl
-
+from utils.parser import Parser
 
 
 class Game:
