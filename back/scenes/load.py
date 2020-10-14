@@ -92,13 +92,11 @@ class SavedFile:
         self.init_status = None
         self.err = False
         try:
-            self.replay = sv.Saver.load(os.path.join(self.args.save_path, 'replay', f'{self.name}.gnr'))
+            self.replay = sv.Saver.load_head(os.path.join(self.args.save_path, 'replay', f'{self.name}.gnr'))
             self.date = self.replay['date']
             self.num = self.replay['num']
             self.turn = self.replay['turn']
             self.winner = self.replay['winner']
-            self.status = self.replay['status']
-            self.init_status = self.replay['init-status']
         except:
             print(f'ERROR loading saved file: {self.name}.gnr')
             self.err = True
@@ -117,7 +115,7 @@ class SavedFile:
             pos[1] + self.size[1])
         if x0 < mouse_pos[0] < x1 and y0 < mouse_pos[1] < y1:
             if not self.err:
-                return ['replay', self.replay]
+                return ['replay', sv.Saver.load(os.path.join(self.args.save_path, 'replay', f'{self.name}.gnr'))]
         elif x0 < mouse_pos[0] < x1 and y1 < mouse_pos[1] < y2:
             return ['delete', self.name]
         return [None]

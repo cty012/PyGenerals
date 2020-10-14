@@ -86,7 +86,7 @@ class Game:
             else:
                 self.replay_menu.toggle_pause()
                 self.replay_menu.toggle_pause()
-                self.command.command_lists = [[item] for item in self.replay['record'][self.map.turn + 1]]
+                self.command.command_lists = [[item] for item in self.replay['command'][self.map.turn + 1]]
             self.map.set_status(self.replay['status'][self.map.turn], refresh=False)
             self.map.refresh(('player',))
         elif command[0] == 'replay':

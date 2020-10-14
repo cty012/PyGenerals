@@ -133,15 +133,19 @@ class Game:
         self.status['running'] = False
 
     def get_json(self):
-        return {
-            'date': self.date,
-            'num': self.mode['num'],
-            'turn': self.map.turn,
-            'winner': self.status['winner'],
-            'status': self.status_record,
-            'init-status': self.map.init_status,
-            'record': self.map.record
-        }
+        return [
+            {
+                'date': self.date,
+                'num': self.mode['num'],
+                'turn': self.map.turn,
+                'winner': self.status['winner'],
+            },
+            {
+                'status': self.status_record,
+                'init-status': self.map.init_status,
+                'command': self.map.record
+            }
+        ]
 
     def show(self, ui):
         self.map.show(ui)

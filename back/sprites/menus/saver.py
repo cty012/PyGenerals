@@ -59,12 +59,21 @@ class Saver:
 
     def save(self, game_json):
         with open(os.path.join(self.args.save_path, 'replay', f'{self.text}.gnr'), 'w') as file:
-            json.dump(game_json, file)
+            file.write(json.dumps(game_json[0]) + '\n')
+            file.write(json.dumps(game_json[1]))
+
+    @classmethod
+    def load_head(cls, path):
+        with open(path, 'r') as file:
+            content = json.loads(file.readline())
+        return content
 
     @classmethod
     def load(cls, path):
         with open(path, 'r') as file:
-            content = json.load(file)
+            content = json.loads(file.readline())
+            content.update(json.loads(file.readline()))
+        print(content.keys())
         return content
 
     def shift(self, key, mods):
