@@ -20,7 +20,7 @@ class Scene:
         self.pan = 0
 
         # saves and buttons
-        self.saves = [SavedFile(self.args, file[:-4]) for file in os.listdir(os.path.join(self.args.path, 'replay')) if file.endswith('.gnr')]
+        self.saves = [SavedFile(self.args, file[:-4]) for file in os.listdir(os.path.join(self.args.save_path, 'replay')) if file.endswith('.gnr')]
         self.saves.sort(key=lambda sf: [not sf.err, re.split(r'[\-_]', sf.date), sf.name], reverse=True)
         self.button = c.Button(
             (self.args.size[0] // 2, self.args.size[1] - self.bar_height // 2), (200, 50),
@@ -50,7 +50,7 @@ class Scene:
 
     def execute(self, command):
         if command[0] == 'delete':
-            os.remove(os.path.join(self.args.path, 'replay', f'{command[1]}.gnr'))
+            os.remove(os.path.join(self.args.save_path, 'replay', f'{command[1]}.gnr'))
             for i in range(len(self.saves)):
                 if self.saves[i].name == command[1]:
                     self.saves.pop(i)
@@ -92,7 +92,7 @@ class SavedFile:
         self.init_status = None
         self.err = False
         try:
-            self.replay = sv.Saver.load(os.path.join(self.args.path, 'replay', f'{self.name}.gnr'))
+            self.replay = sv.Saver.load(os.path.join(self.args.save_path, 'replay', f'{self.name}.gnr'))
             self.date = self.replay['date']
             self.num = self.replay['num']
             self.turn = self.replay['turn']
@@ -141,18 +141,6 @@ class SavedFile:
         ui.show_div(
             (pos[0] + self.size[0] - 120, pos[1] + self.size[1] // 2),
             (120, self.size[1] // 2), color=(160, 145, 145), pan=pan)
-
-        # show grid
-        # ui.show_div(pos, self.size, border=2, pan=pan)
-        # ui.show_line(
-        #     (pos[0] + self.size[0] - 300, pos[1]),
-        #     (pos[0] + self.size[0] - 300, pos[1] + self.size[1]), width=4, color=(40, 80, 60), pan=pan)
-        # ui.show_line(
-        #     (pos[0] + self.size[0] - 120, pos[1]),
-        #     (pos[0] + self.size[0] - 120, pos[1] + self.size[1]), width=4, color=(40, 80, 60), pan=pan)
-        # ui.show_line(
-        #     (pos[0] + self.size[0] - 120, pos[1] + self.size[1] // 2),
-        #     (pos[0] + self.size[0], pos[1] + self.size[1] // 2), width=4, color=(40, 80, 60), pan=pan)
 
         # show name, num, & turn
         ui.show_text(

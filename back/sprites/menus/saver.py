@@ -58,7 +58,7 @@ class Saver:
         return [None]
 
     def save(self, game_json):
-        with open(os.path.join(self.args.path, 'replay', f'{self.text}.gnr'), 'w') as file:
+        with open(os.path.join(self.args.save_path, 'replay', f'{self.text}.gnr'), 'w') as file:
             json.dump(game_json, file)
 
     @classmethod
