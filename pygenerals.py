@@ -1,5 +1,4 @@
 import os
-import platform
 import sys
 
 import main.app as app
