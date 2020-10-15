@@ -32,10 +32,6 @@ class Human:
 
         # mouse events
         if events['mouse-left'] == 'down':
-            target = self.map.pos_to_cord(events['mouse-pos'])
-            if self.map.cursor is None or target not in self.map.get_adj_cords(self.map.cursor, corner=False, trim=False):
-                self.map.cursor = target
-            else:
-                commands['move-cursor'] = [target[0] - self.map.cursor[0], target[1] - self.map.cursor[1]]
+            self.map.cursor = self.map.pos_to_cord(events['mouse-pos'])
 
         return commands
