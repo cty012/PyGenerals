@@ -5,7 +5,6 @@ class Human:
         self.map = map
 
     def process_events(self, events):
-        key_pressed, key_down = events['key-pressed'], events['key-down']
         commands = {'move-board': [0, 0], 'move-cursor': [0, 0], 'clear': False}
 
         # key events
