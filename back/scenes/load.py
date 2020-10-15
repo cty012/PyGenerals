@@ -92,7 +92,7 @@ class SavedFile:
         self.init_status = None
         self.err = False
         try:
-            self.replay = sv.Saver.load_head(os.path.join(self.args.save_path, 'replay', f'{self.name}.gnr'))
+            self.replay = sv.Saver.load(os.path.join(self.args.save_path, 'replay', f'{self.name}.gnr'), lines=1)
             self.date = self.replay['date']
             self.num = self.replay['num']
             self.turn = self.replay['turn']

@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import re
 
@@ -63,17 +64,16 @@ class Saver:
             file.write(json.dumps(game_json[1]))
 
     @classmethod
-    def load_head(cls, path):
+    def load(cls, path, lines=math.inf):
+        content = {}
         with open(path, 'r') as file:
-            content = json.loads(file.readline())
-        return content
-
-    @classmethod
-    def load(cls, path):
-        with open(path, 'r') as file:
-            content = json.loads(file.readline())
-            content.update(json.loads(file.readline()))
-        print(content.keys())
+            line = 0
+            while line < lines:
+                content_str = file.readline()
+                if content_str == '':
+                    break
+                content.update(json.loads(content_str))
+                line += 1
         return content
 
     def shift(self, key, mods):
