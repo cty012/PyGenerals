@@ -9,24 +9,26 @@ class Human:
         commands = {'move-board': [0, 0], 'move-cursor': [0, 0], 'clear': False}
 
         # key events
-        if 'w' in key_pressed:
-            commands['move-board'][1] -= 1
-        if 'a' in key_pressed:
-            commands['move-board'][0] -= 1
-        if 's' in key_pressed:
-            commands['move-board'][1] += 1
-        if 'd' in key_pressed:
-            commands['move-board'][0] += 1
-        if 'up' in key_down:
-            commands['move-cursor'][1] -= 1
-        if 'left' in key_down:
-            commands['move-cursor'][0] -= 1
-        if 'down' in key_down:
-            commands['move-cursor'][1] += 1
-        if 'right' in key_down:
-            commands['move-cursor'][0] += 1
-        if 'space' in key_down:
-            commands['clear'] = True
+        for key in events['key-pressed']:
+            if key == 'w':
+                commands['move-board'][1] -= 1
+            elif key == 'a':
+                commands['move-board'][0] -= 1
+            elif key == 's':
+                commands['move-board'][1] += 1
+            elif key == 'd':
+                commands['move-board'][0] += 1
+        for key in events['key-down']:
+            if key == 'up':
+                commands['move-cursor'][1] -= 1
+            elif key == 'left':
+                commands['move-cursor'][0] -= 1
+            elif key == 'down':
+                commands['move-cursor'][1] += 1
+            elif key == 'right':
+                commands['move-cursor'][0] += 1
+            elif key == 'space':
+                commands['clear'] = True
         if commands['move-cursor'][0] != 0 and commands['move-cursor'][1] != 0:
             commands['move-cursor'][1] = 0
 
