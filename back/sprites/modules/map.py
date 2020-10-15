@@ -183,13 +183,18 @@ class Map:
                 return [orig_cursor, target, com_code]
             self.cursor = target
 
-    def move_board(self, direction=(0, 0)):
-        step = (-11, -11)
+    def move_board(self, direction=(0, 0), step=11):
+        step = (-step, -step)
         self.pan = (self.pan[0] + step[0] * direction[0], self.pan[1] + step[1] * direction[1])
         self.pan = (
             utils.min_max(self.pan[0], -self.total_size[0] // 2, self.total_size[0] // 2),
             utils.min_max(self.pan[1], -self.total_size[1] // 2, self.total_size[1] // 2)
         )
+
+    def focus_grid(self, grid):
+        self.pan = (
+            self.total_size[0] // 2 - grid[0] * self.grid_size - self.grid_size // 2,
+            self.total_size[1] // 2 - grid[1] * self.grid_size - self.grid_size // 2)
 
     def conquer(self, p1, p2):
         for cord in self.prd:
@@ -256,10 +261,7 @@ class MapLoader:
         map.cities = map.get_blocks_by_prop('terrain', ['base', 'city'])
         for id in range(len(map.players)):
             map.players[id]['land'] = map.players[id]['army'] = len(map.get_blocks_by_prop('owner', [id]))
-        base = map.get_base(map.id)
-        map.pan = (
-            map.total_size[0] // 2 - base[0] * map.grid_size - map.grid_size // 2,
-            map.total_size[1] // 2 - base[1] * map.grid_size - map.grid_size // 2)
+        map.focus_grid(map.get_base(map.id))
 
     @classmethod
     def generate_map_status(cls, dim, num_players):

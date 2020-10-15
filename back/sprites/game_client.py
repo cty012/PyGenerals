@@ -39,8 +39,9 @@ class Game:
         if map_commands['clear']:
             self.command.clear_command(self.mode['id'])
             self.send(json.dumps({'tag': 'clear'}))
-        self.execute(['move-board', map_commands['move-board']])
+        self.execute(['move-board', map_commands['move-board'][:2], map_commands['move-board'][2]])
         self.execute(['move-cursor', map_commands['move-cursor']])
+        self.execute(['focus', map_commands['focus']])
         # pass
         return [None]
 
@@ -48,12 +49,15 @@ class Game:
         if command[0] == 'pause':
             self.map.clock.toggle_run()
         elif command[0] == 'move-board':
-            self.map.move_board(command[1])
+            self.map.move_board(command[1], command[2])
         elif command[0] == 'move-cursor':
             if command[1] != [0, 0]:
                 move = self.map.move_cursor(command[1], self.command)
                 if move is not None:
                     self.send(json.dumps({'tag': 'move', 'move': move}))
+        elif command[0] == 'focus':
+            if command[1] is not None:
+                self.map.focus_grid(command[1])
         elif command[0] == 'close':
             self.send(json.dumps({'tag': 'close'}))
             self.close()
@@ -104,6 +108,7 @@ class Game:
 
     def show(self, ui):
         self.map.show(ui)
+        self.player.show(ui)
         self.command.show(ui, self.map)
         self.scoreboard.show(ui)
         self.turn_displayer.show(ui)
