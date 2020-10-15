@@ -52,7 +52,7 @@ class Scene:
     def add_clients(self, status):
         def func():
             print('\nSERVER START accepting...')
-            while status['running']:
+            while status['running'] and len(self.clients) < 8:
                 try:
                     client_socket, address = self.server.accept()
                     self.clients.append({'ip': address[0], 'port': address[1], 'socket': client_socket})
@@ -93,7 +93,7 @@ class Scene:
         # show connected ips
         ui.show_text((self.args.size[0] // 2, 180), 'client ip', f.tnr(30), color=(128, 0, 0), align=(1, 1))
         for i, client in enumerate(self.clients):
-            ui.show_text((self.args.size[0] // 2, 180 + (i + 1) * 60), client['ip'], f.tnr(30), align=(1, 1))
+            ui.show_text((self.args.size[0] // 2, 180 + (i + 1) * 50), client['ip'], f.tnr(30), align=(1, 1))
         # show buttons
         for name in self.buttons:
             self.buttons[name].show(ui)
