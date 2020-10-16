@@ -1,7 +1,9 @@
 import utils.functions as utils
 
 
-rgb = lambda *a: a
+def rgb(*a):
+    return a
+
 
 white = rgb(255, 255, 255)
 black = rgb(0, 0, 0)
@@ -19,8 +21,14 @@ p_magenta = rgb(180, 35, 260)
 p_brown = rgb(128, 80, 0)
 p_lavender = rgb(190, 160, 220)
 
-get_player_colors = lambda: [p_red, p_blue, p_green, p_yellow, p_cyan, p_magenta, p_brown, p_lavender]
+
+def get_player_colors():
+    return [p_red, p_blue, p_green, p_yellow, p_cyan, p_magenta, p_brown, p_lavender]
 
 
 def add(color, num):
     return tuple((utils.min_max(color[i] + num, 0, 255)) for i in (0, 1, 2))
+
+
+def multiply(color, num):
+    return tuple((utils.min_max(color[i] * num, 0, 255)) for i in (0, 1, 2))
