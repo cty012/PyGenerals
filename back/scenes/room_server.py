@@ -76,10 +76,8 @@ class Scene:
         if name == 'play':
             self.status['running'] = False
             # send info to clients
-            for i, client in enumerate(self.clients):
-                client_info = bytes(json.dumps([i + 1, len(self.clients) + 1]), encoding='utf-8')
-                client['socket'].send(bytes(f'{len(client_info):10}', encoding='utf-8'))
-                client['socket'].send(client_info)
+            for i in range(len(self.clients)):
+                self.send(json.dumps({'tag': 'play'}), i + 1)
             return ['game', {
                 'id': 0, 'num': len(self.clients) + 1, 'socket': self.server,
                 'clients': self.clients
