@@ -11,6 +11,8 @@ class Human:
         self.bookmarks['1'] = self.map.get_base(self.map.id)
 
     def find_bookmark(self, grid):
+        if grid is None:
+            return None
         for index in self.bookmarks:
             if self.bookmarks[index] == grid:
                 return index
