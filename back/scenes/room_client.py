@@ -86,14 +86,14 @@ class Scene:
                 ui.show_div(pos, (368, 56), color=color, align=(1, 1))
                 ui.show_div((pos[0], pos[1] + 28), (368, 12), color=cl.multiply(color, 0.8), align=(1, 0))
                 ui.show_text(
-                    pos, self.ip_list[i], f.get_font('cambria-bold', 25),
-                    color=cl.white, save='cambria-bold-25-white', align=(1, 1))
+                    pos, self.ip_list[i], f.tnr_bold(25),
+                    color=cl.white, save='tnr-bold-25-white', align=(1, 1))
             elif i < len(self.ip_list):
                 ui.show_div(pos, (368, 56), color=cl.white, align=(1, 1))
                 ui.show_div((pos[0], pos[1] + 28), (368, 12), color=color, align=(1, 0))
                 ui.show_text(
-                    pos, self.ip_list[i], f.get_font('cambria-bold', 25),
-                    save='cambria-bold--25', align=(1, 1))
+                    pos, self.ip_list[i], f.tnr_bold(25),
+                    save='tnr-bold-25', align=(1, 1))
             else:
                 ui.show_div(pos, (368, 56), color=cl.white, align=(1, 1))
                 ui.show_div((pos[0], pos[1] + 28), (368, 12), color=cl.white, align=(1, 0))

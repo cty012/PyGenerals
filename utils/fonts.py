@@ -2,9 +2,14 @@ def get_font(font_name, font_size, font_type='ttf'):
     return 'src', f'{font_name}.{font_type}', font_size
 
 
-# times new roman
+# merriweather light
 def tnr(font_size):
-    return 'src', 'timesnewroman.ttf', font_size
+    return 'src', 'merriweather.ttf', font_size
+
+
+# merriweather bold
+def tnr_bold(font_size):
+    return 'src', 'merriweather-bold.ttf', font_size
 
 
 # cambria
