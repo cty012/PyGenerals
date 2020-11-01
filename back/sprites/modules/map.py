@@ -169,12 +169,13 @@ class Map:
         def controllable(cord, id):
             return self.get(cord).owner == id or (len(command_list) > 0 and cord == command_list[-1][1])
 
-        def not_mountain(cord):
-            return self.get(cord).terrain != 'mountain'
+        def mountain_like(cord):
+            block = self.get(cord)
+            return block.terrain == 'mountain' or (block.terrain == 'city' and not block.visible)
 
-        # valid target & cursor's block is controllable & not mountain
+        # valid target & cursor's block is controllable & not mountain or hidden city
         if self.cord_in_range(target):
-            if controllable(self.cursor, self.id) and not_mountain(target):
+            if controllable(self.cursor, self.id) and not mountain_like(target):
                 # record command
                 com_code = command.add((self.cursor, target), self.id)
                 # move cursor

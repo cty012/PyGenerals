@@ -31,7 +31,10 @@ class Game:
         self.status_record = [self.map.get_status(('owner', 'num', 'terrain'))]
         # connect
         self.status = {
-            'connected': [False if id == 0 else True for id in range(self.mode['num'])], 'running': True, 'winner': None}
+            'connected': [False if id == 0 else True for id in range(self.mode['num'])],
+            'running': True,
+            'winner': None,
+        }
         self.thread_recv = []
         for id in range(1, self.mode['num']):
             new_thread = Thread(target=self.receive(id), name=f'recv-{id}', daemon=True)

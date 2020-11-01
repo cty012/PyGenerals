@@ -1,3 +1,5 @@
+import json
+
 import back.sprites.component as c
 import back.sprites.game_server as g_s
 import back.sprites.game_client as g_c
@@ -54,6 +56,8 @@ class Scene:
         if command[0] == 'pause':
             self.game_menu.active = not self.game_menu.active
             self.game.execute(['pause'])
+            if self.mode['id'] == 0:
+                self.game.sends(json.dumps({'tag': 'pause'}))
         elif command[0] == 'save':
             self.saver.text = self.game.name
             self.saver.active = not self.saver.active

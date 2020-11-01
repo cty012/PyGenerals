@@ -9,6 +9,7 @@ import back.sprites.modules.map as m
 import back.sprites.modules.scoreboard as sb
 import back.sprites.modules.turn_displayer as td
 import utils.colors as cl
+import utils.fonts as f
 from utils.parser import Parser
 
 
@@ -23,7 +24,7 @@ class Game:
         self.command = cm.Command(self.args, self.players, self.mode['id'])
         self.map_status = None
         # connect
-        self.status = {'connected': True, 'running': True, 'winner': None}
+        self.status = {'connected': True, 'running': True, 'winner': None, 'paused': False}
         self.thread_recv = Thread(target=self.receive, name='recv', daemon=True)
         self.thread_recv.start()
         # map
@@ -52,7 +53,7 @@ class Game:
             self.map.move_board(command[1], command[2])
         elif command[0] == 'move-cursor':
             if command[1] != [0, 0]:
-                move = self.map.move_cursor(command[1], self.command)
+                move = self.map.move_cursor(command[1], self.command, execute=not self.status['paused'])
                 if move is not None:
                     self.send(json.dumps({'tag': 'move', 'move': move}))
         elif command[0] == 'focus':
@@ -98,6 +99,8 @@ class Game:
                 elif msg['tag'] == 'conquer':
                     self.map.conquer(msg['players'][0], msg['players'][1])
                     self.status['winner'] = self.map.get_winner()
+                elif msg['tag'] == 'pause':
+                    self.status['paused'] = not self.status['paused']
         print(f'CLIENT END receiving FROM SERVER...')
 
     def close(self):
@@ -112,3 +115,9 @@ class Game:
         self.command.show(ui, self.map)
         self.scoreboard.show(ui)
         self.turn_displayer.show(ui)
+        if self.status['paused']:
+            ui.show_div(self.args.get_pos(1, 1), (400, 100), color=(192, 192, 192), align=(1, 1))
+            ui.show_div(self.args.get_pos(1, 1), (400, 100), color=(0, 0, 0), border=2, align=(1, 1))
+            ui.show_text(
+                self.args.get_pos(1, 1), 'SERVER PAUSED', font=f.cambria(30),
+                save='cambria-30', color=(0, 0, 0), align=(1, 1))
