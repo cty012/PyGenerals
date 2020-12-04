@@ -141,6 +141,8 @@ class Map:
                 self.get((row, col)).visible = False
 
         # check
+        self_is_alive = self.get_base(self.id) is not None
+
         for row, col in self.prd:
             block = self.get((row, col))
             if 'player' in items:
@@ -148,7 +150,7 @@ class Map:
                     self.players[block.owner]['land'] += 1
                     self.players[block.owner]['army'] += block.num
             if 'visible' in items:
-                if block.owner == self.id:
+                if block.owner == self.id or not self_is_alive:
                     self.get((row, col)).visible = True
                     for adj_cord in self.get_adj_cords((row, col)):
                         self.get(adj_cord).visible = True
