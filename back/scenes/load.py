@@ -20,20 +20,29 @@ class Scene:
         self.pan = 0
 
         # saves and buttons
-        self.saves = [SavedFile(self.args, file[:-4]) for file in os.listdir(os.path.join(self.args.save_path, 'replay')) if file.endswith('.gnr')]
+        self.saves = [
+            SavedFile(self.args, file[:-4])
+            for file in os.listdir(os.path.join(self.args.save_path, 'replay'))
+            if file.endswith('.gnr')
+        ]
         self.saves.sort(key=lambda sf: [not sf.err, re.split(r'[\-_]', sf.date), sf.name], reverse=True)
-        self.button = c.Button(
-            (self.args.size[0] // 2, self.args.size[1] - self.bar_height // 2), (200, 50),
-            'back', font=f.tnr(22), save='tnr-22', align=(1, 1), background=(210, 210, 210))
+        self.buttons = {
+            'open-location': c.Button(
+                (self.args.size[0] - 100, 100), (120, 60),
+                'open location', font=f.tnr(15), save='tnr-15', align=(1, 1), background=(210, 210, 210)),
+            'back': c.Button(
+                (self.args.size[0] // 2, self.args.size[1] - self.bar_height // 2), (200, 50),
+                'back', font=f.tnr(22), save='tnr-22', align=(1, 1), background=(210, 210, 210))
+        }
 
     def process_events(self, events):
         total_height = len(self.saves) * (self.padding + 120) - self.padding + 2 * self.margin
         if events['mouse-left'] == 'down':
             m_pos = events['mouse-pos']
-            # back button
-            if m_pos[1] >= self.args.size[1] - self.bar_height:
-                if self.button.in_range(m_pos):
-                    return ['menu']
+            # buttons
+            for name in self.buttons:
+                if self.buttons[name].in_range(m_pos):
+                    return self.execute([name])
             # saved files
             else:
                 for i, saved_file in enumerate(self.saves):
@@ -55,6 +64,11 @@ class Scene:
                 if self.saves[i].name == command[1]:
                     self.saves.pop(i)
                     break
+        elif command[0] == 'open-location':
+            print(os.path.join(self.args.save_path, 'replay'))
+            os.startfile(os.path.join(self.args.save_path, 'replay'))
+        elif command[0] == 'back':
+            return ['menu']
         return command
 
     def show(self, ui):
@@ -71,7 +85,8 @@ class Scene:
         ui.show_line((0, self.args.size[1] - self.bar_height), (self.args.size[0], self.args.size[1] - self.bar_height),
                      width=2)
         # button
-        self.button.show(ui)
+        for name in self.buttons:
+            self.buttons[name].show(ui)
 
 
 class SavedFile:
